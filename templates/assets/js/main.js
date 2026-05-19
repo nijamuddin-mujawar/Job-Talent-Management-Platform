@@ -1,9 +1,6 @@
-// NO LOADING SCREEN - Direct content display
-// Initialize everything immediately when DOM loads
 document.addEventListener('DOMContentLoaded', function() {
   console.log('🚀 SkillConnect loading - No loading screen');
   
-  // Initialize AOS if available
   if (typeof AOS !== 'undefined') {
     AOS.init({
       duration: 800,
@@ -14,26 +11,22 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ AOS initialized');
   }
   
-  // Initialize all components immediately
   initializeSearch();
   initializeNewsletter();
   initializeContactForm();
   initializeFAQ();
   initializeTestimonials();
   
-  // Load dynamic content immediately
   loadStats();
   
   console.log('✅ SkillConnect initialized successfully - Fast load!');
 });
 
-// Dynamic navigation based on login status (immediate)
 const jobsLink = document.getElementById('jobs-link');
 const profileLink = document.getElementById('profile-link');
 const companiesLink = document.getElementById('companies-link');
 const resourcesLink = document.getElementById('resources-link');
 
-// Debug navigation links
 console.log('Navigation Links Found:', {
   jobs: !!jobsLink,
   profile: !!profileLink,
@@ -41,23 +34,18 @@ console.log('Navigation Links Found:', {
   resources: !!resourcesLink
 });
 
-// Ensure companies and resources links work properly
 if (companiesLink) {
   companiesLink.addEventListener('click', function(e) {
     console.log('Companies link clicked!');
-    // Allow default navigation
   });
 }
 
 if (resourcesLink) {
   resourcesLink.addEventListener('click', function(e) {
     console.log('Resources link clicked!');
-    // Allow default navigation
   });
 }
 
-// For testing purposes, allow direct access to profile page
-// Remove this when implementing real authentication
 const currentPath = window.location.pathname;
 const isProfilePage = currentPath.includes('profile.html');
 
@@ -68,7 +56,6 @@ if (!localStorage.getItem('access_token') && !isProfilePage) {
   if (jobsLink) jobsLink.setAttribute('href', 'jobs.html');
   if (profileLink) profileLink.setAttribute('href', 'profile.html');
   
-  // Set a demo access token for profile page testing
   if (isProfilePage && !localStorage.getItem('access_token')) {
     localStorage.setItem('access_token', 'demo-token');
     localStorage.setItem('user_email', 'demo@skillconnect.com');
@@ -80,7 +67,6 @@ if (!localStorage.getItem('access_token') && !isProfilePage) {
   }
 }
 
-// Search functionality
 function initializeSearch() {
   const searchBtn = document.getElementById('search-btn');
   if (searchBtn) {
@@ -103,14 +89,12 @@ function performSearch() {
     resultsDiv.innerHTML = '<div class="loading">🔍 Searching for jobs...</div>';
     resultsDiv.classList.add('show');
     
-    // Simulate search with sample data
     setTimeout(() => {
       displaySampleSearchResults(resultsDiv, keyword, location, category);
     }, 1500);
   }
 }
 
-// Display sample search results
 function displaySampleSearchResults(container, keyword, location, category) {
   const sampleJobs = [
     {
@@ -143,7 +127,6 @@ function displaySampleSearchResults(container, keyword, location, category) {
     }
   ];
   
-  // Filter based on search criteria
   const filteredJobs = sampleJobs.filter(job => {
     let matches = true;
     if (keyword && !job.title.toLowerCase().includes(keyword) && !job.description.toLowerCase().includes(keyword)) {
@@ -188,7 +171,6 @@ function displaySampleSearchResults(container, keyword, location, category) {
   container.innerHTML = jobsHTML;
 }
 
-// Quick search function
 function quickSearch(term) {
   const searchInput = document.getElementById('search-keyword');
   if (searchInput) {
@@ -197,16 +179,12 @@ function quickSearch(term) {
   }
 }
 
-// Search by category
 function searchByCategory(category) {
-  // Store category in sessionStorage for the jobs page
   sessionStorage.setItem('selectedCategory', category);
   
-  // Redirect to jobs page
   window.location.href = 'jobs.html';
 }
 
-// Newsletter functionality
 function initializeNewsletter() {
   const subscribeBtn = document.getElementById('subscribe-btn');
   const newsletterEmail = document.getElementById('newsletter-email');
@@ -242,12 +220,10 @@ function subscribeToNewsletter() {
     return;
   }
   
-  // Show loading state
   const originalText = subscribeBtn.innerHTML;
   subscribeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subscribing...';
   subscribeBtn.disabled = true;
   
-  // Simulate API call
   setTimeout(() => {
     showNotification('🎉 Successfully subscribed to newsletter!', 'success');
     emailInput.value = '';
@@ -256,7 +232,6 @@ function subscribeToNewsletter() {
   }, 2000);
 }
 
-// Contact form functionality
 function initializeContactForm() {
   const contactForm = document.getElementById('contact-form');
   
@@ -278,14 +253,12 @@ function initializeContactForm() {
         return;
       }
       
-      // Show loading state
       const submitBtn = contactForm.querySelector('button[type="submit"]');
       if (submitBtn) {
         const originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         submitBtn.disabled = true;
         
-        // Simulate API call
         setTimeout(() => {
           showNotification('✅ Message sent successfully!', 'success');
           contactForm.reset();
@@ -297,11 +270,9 @@ function initializeContactForm() {
   }
 }
 
-// Load statistics with animation
 function loadStats() {
   console.log('🔢 Loading stats animation...');
   
-  // Start animation immediately
   setTimeout(() => {
     const statNumbers = document.querySelectorAll('.stat-number');
     console.log('Found stat elements:', statNumbers.length);
@@ -325,13 +296,11 @@ function loadStats() {
         }
       };
       
-      // Start each animation with a small delay
       setTimeout(animate, index * 200);
     });
   }, 1000);
 }
 
-// Format large numbers (utility function)
 function formatNumber(num) {
   if (num >= 1000000) {
     return (num / 1000000).toFixed(1) + 'M';
@@ -342,7 +311,6 @@ function formatNumber(num) {
   return num.toString();
 }
 
-// Load recent jobs with sample data
 function loadRecentJobs() {
   console.log('🔍 Loading recent jobs...');
   const jobsGrid = document.getElementById('recent-jobs-grid');
@@ -360,11 +328,9 @@ function loadRecentJobs() {
     return;
   }
   
-  // Hide loading immediately
   if (jobsLoading) jobsLoading.style.display = 'none';
   if (jobsError) jobsError.style.display = 'none';
   
-  // Load sample data immediately - no delay
   try {
     const sampleJobs = [
       {
@@ -425,7 +391,6 @@ function loadRecentJobs() {
     jobsGrid.innerHTML = jobsHTML;
     console.log('✅ Jobs loaded successfully:', sampleJobs.length, 'jobs');
     
-    // Re-initialize AOS for new elements
     if (typeof AOS !== 'undefined') {
       AOS.refresh();
       console.log('✅ AOS refreshed');
@@ -438,7 +403,6 @@ function loadRecentJobs() {
   }
 }
 
-// Apply to job function
 function applyToJob(title, company) {
   const token = localStorage.getItem('access_token');
   if (!token) {
@@ -452,7 +416,6 @@ function applyToJob(title, company) {
   showNotification(`🎯 Application submitted for ${title} at ${company}!`, 'success');
 }
 
-// FAQ functionality
 function initializeFAQ() {
   const faqQuestions = document.querySelectorAll('.faq-question');
   
@@ -467,18 +430,15 @@ function toggleFaq(element) {
   const faqItem = element.closest('.faq-item');
   const isActive = faqItem.classList.contains('active');
   
-  // Close all other FAQ items
   document.querySelectorAll('.faq-item').forEach(item => {
     item.classList.remove('active');
   });
   
-  // Toggle current item
   if (!isActive) {
     faqItem.classList.add('active');
   }
 }
 
-// Testimonials functionality
 let currentTestimonial = 0;
 const testimonials = [];
 
@@ -493,7 +453,6 @@ function initializeTestimonials() {
     }
   });
   
-  // Auto-rotate testimonials every 5 seconds
   if (testimonials.length > 1) {
     setInterval(nextTestimonial, 5000);
   }
@@ -535,7 +494,6 @@ function goToTestimonial(index) {
   document.querySelectorAll('.dot')[currentTestimonial]?.classList.add('active');
 }
 
-// Utility functions
 function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
@@ -552,13 +510,11 @@ function formatNumber(num) {
 }
 
 function showNotification(message, type = 'info') {
-  // Remove existing notifications
   const existingNotifications = document.querySelectorAll('.notification');
   existingNotifications.forEach(notification => {
     notification.remove();
   });
   
-  // Create notification element
   const notification = document.createElement('div');
   notification.className = `notification notification-${type}`;
   notification.innerHTML = `
@@ -570,7 +526,6 @@ function showNotification(message, type = 'info') {
     </button>
   `;
   
-  // Style the notification
   Object.assign(notification.style, {
     position: 'fixed',
     top: '20px',
@@ -591,7 +546,6 @@ function showNotification(message, type = 'info') {
     boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)'
   });
   
-  // Set background color based on type
   const colors = {
     success: '#10b981',
     error: '#ef4444',
@@ -600,15 +554,12 @@ function showNotification(message, type = 'info') {
   };
   notification.style.backgroundColor = colors[type] || colors.info;
   
-  // Add to DOM
   document.body.appendChild(notification);
   
-  // Animate in
   setTimeout(() => {
     notification.style.transform = 'translateX(0)';
   }, 100);
   
-  // Remove after 5 seconds
   setTimeout(() => {
     notification.style.transform = 'translateX(100%)';
     setTimeout(() => {
@@ -619,7 +570,6 @@ function showNotification(message, type = 'info') {
   }, 5000);
 }
 
-// Smooth scrolling for anchor links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function (e) {
     e.preventDefault();
@@ -633,7 +583,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   });
 });
 
-// Back to top functionality
 const backToTopBtn = document.getElementById('back-to-top');
 if (backToTopBtn) {
   window.addEventListener('scroll', function() {
@@ -652,7 +601,6 @@ if (backToTopBtn) {
   });
 }
 
-// Navbar scroll effect
 window.addEventListener('scroll', function() {
   const navbar = document.getElementById('navbar');
   if (navbar) {
@@ -666,7 +614,6 @@ window.addEventListener('scroll', function() {
 
 console.log('🚀 SkillConnect Premium UI loaded successfully! Welcome NijaMujawar!');
 
-// Missing functions implementation
 function quickSearch(query) {
   document.getElementById('search-keyword').value = query;
   performSearch();
@@ -682,7 +629,6 @@ function toggleBookmark(jobId) {
 }
 
 function applyToJob(jobId) {
-  // Check if user is logged in
   if (!localStorage.getItem('access_token')) {
     showNotification('Please login to apply for jobs', 'warning');
     setTimeout(() => {
@@ -693,7 +639,6 @@ function applyToJob(jobId) {
   }
 }
 
-// Initialize Newsletter
 function initializeNewsletter() {
   const subscribeBtn = document.getElementById('subscribe-btn');
   if (subscribeBtn) {
@@ -717,11 +662,9 @@ function handleNewsletterSubscribe() {
     return;
   }
   
-  // Show loading
   btnText.style.display = 'none';
   btnLoading.style.display = 'inline-block';
   
-  // Simulate API call
   setTimeout(() => {
     btnText.style.display = 'inline-block';
     btnLoading.style.display = 'none';
@@ -730,7 +673,6 @@ function handleNewsletterSubscribe() {
   }, 2000);
 }
 
-// Initialize Contact Form
 function initializeContactForm() {
   const contactForm = document.getElementById('contact-form');
   if (contactForm) {
@@ -750,14 +692,11 @@ function handleContactForm(e) {
     return;
   }
   
-  // Simulate form submission
   showNotification('Message sent successfully!', 'success');
   e.target.reset();
 }
 
-// Initialize FAQ
 function initializeFAQ() {
-  // FAQ functionality already implemented globally
 }
 
 function toggleFaq(element) {
@@ -765,7 +704,6 @@ function toggleFaq(element) {
   const answer = faqItem.querySelector('.faq-answer');
   const icon = element.querySelector('.faq-icon');
   
-  // Close other FAQs
   document.querySelectorAll('.faq-item').forEach(item => {
     if (item !== faqItem) {
       item.classList.remove('active');
@@ -774,7 +712,6 @@ function toggleFaq(element) {
     }
   });
   
-  // Toggle current FAQ
   faqItem.classList.toggle('active');
   
   if (faqItem.classList.contains('active')) {
@@ -786,9 +723,7 @@ function toggleFaq(element) {
   }
 }
 
-// Initialize Testimonials
 function initializeTestimonials() {
-  // Testimonial functionality already implemented
 }
 
 let currentTestimonialIndex = 0;
@@ -832,7 +767,6 @@ function currentTestimonial(index) {
   dots[currentTestimonialIndex].classList.add('active');
 }
 
-// Mobile Menu Toggle
 const mobileToggle = document.getElementById('mobile-toggle');
 const navLinks = document.getElementById('nav-links');
 
