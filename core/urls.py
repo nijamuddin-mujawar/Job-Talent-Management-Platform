@@ -7,12 +7,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 
-# ✅ Custom Admin Panel Branding
+                               
 admin.site.site_header = 'SkillConnect Admin Panel'
 admin.site.site_title = 'SkillConnect Admin'
 admin.site.index_title = 'Welcome to SkillConnect Administration'
 
-# Optional imports with fallbacks
+                                 
 try:
     from rest_framework import permissions
     from drf_yasg.views import get_schema_view
@@ -21,9 +21,9 @@ try:
 except ImportError:
     SWAGGER_AVAILABLE = False
 
-# Only create schema if packages are available
+                                              
 if SWAGGER_AVAILABLE:
-    # ✅ Professional API Documentation Schema
+                                             
     schema_view = get_schema_view(
         openapi.Info(
             title="SkillConnect API",
@@ -58,7 +58,7 @@ if SWAGGER_AVAILABLE:
         permission_classes=(permissions.AllowAny,),
     )
 
-# 🔧 Temporary setup view for creating superuser
+                                               
 from django.http import JsonResponse
 from accounts.models import CustomUser
 from jobs.models import Job
@@ -109,44 +109,44 @@ def setup_jobs(request):
     return JsonResponse({'status': 'success', 'message': f'{count} new jobs added. Total: {Job.objects.count()}'})
 
 urlpatterns = [
-    # 🏠 Root redirect to admin panel (for admin.skillconnect.dev)
+                                                                 
     path('', RedirectView.as_view(url='/admin/', permanent=False)),
     
-    # 🔧 Admin interface
+                       
     path('admin/', admin.site.urls),
     
-    # 🚨 TEMPORARY - Setup endpoints (DELETE AFTER USE)
+                                                      
     path('setup-admin/', setup_admin, name='setup-admin'),
     path('setup-jobs/', setup_jobs, name='setup-jobs'),
     
-    # 📋 API routes
+                  
     path('api/accounts/', include('accounts.urls')),
     path('api/newsletter/', include('newsletter.urls')),
     path('api/jobs/', include('jobs.urls')),
     
-    # 🤖 AI Resume Analysis (Groq - FREE)
+                                        
     path('api/ai/', include('core.ai_urls')),
 ]
 
-# Add API documentation URLs only if available
+                                              
 if SWAGGER_AVAILABLE:
     urlpatterns += [
-        # 📚 Professional API Documentation
+                                          
         path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='api-docs-swagger'),
         path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='api-docs-redoc'),
         path('api/schema.json', schema_view.without_ui(cache_timeout=0), name='api-schema-json'),
     ]
 
-# ✅ Development configurations
+                              
 if settings.DEBUG:
-    # Media files serving
+                         
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     
-    # Debug toolbar (Industry standard development tool)
+                                                        
     try:
         import debug_toolbar
         urlpatterns = [
             path('__debug__/', include(debug_toolbar.urls)),
         ] + urlpatterns
     except ImportError:
-        pass  # Debug toolbar not installed - no problem
+        pass                                            

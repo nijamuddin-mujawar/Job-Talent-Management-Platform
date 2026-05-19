@@ -4,7 +4,7 @@ from .models import Job, JobApplication
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
     list_display = ['title', 'company', 'category', 'location', 'job_type', 'salary_display', 'created_at', 'is_active']
-    list_display_links = ['title', 'company']  # Make title and company clickable for editing
+    list_display_links = ['title', 'company']                                                
     list_filter = ['category', 'job_type', 'experience_level', 'work_mode', 'company_size', 'is_active']
     search_fields = ['title', 'company', 'location', 'description']
     ordering = ['-created_at']

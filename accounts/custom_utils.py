@@ -8,9 +8,9 @@ def calculate_profile_strength(user):
     Returns a percentage (0-100) based on filled profile fields
     """
     strength = 0
-    total_fields = 10  # Total fields to check
+    total_fields = 10                         
     
-    # Basic info checks
+                       
     if user.first_name:
         strength += 10
     if user.last_name:
@@ -20,15 +20,15 @@ def calculate_profile_strength(user):
     if hasattr(user, 'profile_picture') and user.profile_picture:
         strength += 10
     
-    # Check for work experience
+                               
     if hasattr(user, 'workexperience_set') and user.workexperience_set.exists():
         strength += 20
     
-    # Check for education
+                         
     if hasattr(user, 'education_set') and user.education_set.exists():
         strength += 20
     
-    # Check for skills
+                      
     if hasattr(user, 'skill_set') and user.skill_set.exists():
         strength += 20
     
@@ -50,7 +50,7 @@ def get_user_activity_level(user):
         return 'low'
 
 
-# Custom error messages for the application
+                                           
 CUSTOM_ERROR_MESSAGES = {
     'required': 'This field is required.',
     'invalid': 'Please enter a valid value.',

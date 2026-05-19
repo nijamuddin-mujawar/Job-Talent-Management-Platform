@@ -1,9 +1,6 @@
-/* =====================================================
-   SKILLCONNECT - PREMIUM MOBILE RESPONSIVE CSS
-   Professional Mobile Experience
-   ===================================================== */
 
-/* ========== MOBILE NAVBAR - Premium ========== */
+
+
 @media (max-width: 768px) {
   .navbar {
     padding: 12px 0 !important;
@@ -91,7 +88,7 @@
   }
 }
 
-/* ========== MOBILE HERO - Stunning ========== */
+
 @media (max-width: 768px) {
   .hero {
     padding: 90px 20px 50px !important;
@@ -134,7 +131,7 @@
   }
 }
 
-/* ========== MOBILE SEARCH BAR - Beautiful ========== */
+
 @media (max-width: 768px) {
   .search-container {
     padding: 0 !important;
@@ -230,7 +227,7 @@
   }
 }
 
-/* ========== MOBILE TRUSTED COMPANIES ========== */
+
 @media (max-width: 768px) {
   .trusted-companies {
     padding: 30px 16px !important;
@@ -254,7 +251,7 @@
   }
 }
 
-/* ========== MOBILE STATS - Impressive ========== */
+
 @media (max-width: 768px) {
   .stats-section,
   .platform-stats {
@@ -295,7 +292,7 @@
   }
 }
 
-/* ========== MOBILE SECTION HEADERS ========== */
+
 @media (max-width: 768px) {
   section {
     padding: 50px 0 !important;
@@ -327,7 +324,7 @@
   }
 }
 
-/* ========== MOBILE CATEGORIES - Beautiful Grid ========== */
+
 @media (max-width: 768px) {
   .categories,
   .categories-section {
@@ -383,7 +380,7 @@
   }
 }
 
-/* ========== MOBILE FEATURES GRID ========== */
+
 @media (max-width: 768px) {
   .features-grid,
   .how-it-works-grid {
@@ -423,7 +420,7 @@
   }
 }
 
-/* ========== MOBILE JOBS GRID ========== */
+
 @media (max-width: 768px) {
   .recent-jobs,
   .jobs-section {
@@ -494,7 +491,7 @@
   }
 }
 
-/* ========== MOBILE TOOLS GRID ========== */
+
 @media (max-width: 768px) {
   .tools-section {
     padding: 50px 16px !important;
@@ -532,7 +529,7 @@
   }
 }
 
-/* ========== MOBILE CTA BANNER ========== */
+
 @media (max-width: 768px) {
   .cta-section,
   .cta-banner {
@@ -557,7 +554,7 @@
   }
 }
 
-/* ========== MOBILE NEWSLETTER ========== */
+
 @media (max-width: 768px) {
   .newsletter {
     padding: 50px 20px !important;
@@ -583,7 +580,7 @@
   }
 }
 
-/* ========== MOBILE TESTIMONIALS ========== */
+
 @media (max-width: 768px) {
   .testimonials {
     padding: 50px 16px !important;
@@ -614,7 +611,7 @@
   }
 }
 
-/* ========== MOBILE FAQ ========== */
+
 @media (max-width: 768px) {
   .faq {
     padding: 50px 16px !important;
@@ -637,7 +634,7 @@
   }
 }
 
-/* ========== MOBILE APP SECTION ========== */
+
 @media (max-width: 768px) {
   .mobile-app {
     padding: 50px 20px !important;
@@ -659,7 +656,7 @@
   }
 }
 
-/* ========== MOBILE FOOTER - Clean ========== */
+
 @media (max-width: 768px) {
   footer {
     padding: 50px 20px 30px !important;
@@ -725,7 +722,7 @@
   }
 }
 
-/* ========== MOBILE FORMS & AUTH ========== */
+
 @media (max-width: 768px) {
   .auth-container {
     padding: 20px !important;
@@ -767,7 +764,7 @@
   }
 }
 
-/* ========== MOBILE PROFILE PAGE ========== */
+
 @media (max-width: 768px) {
   .profile-container {
     padding: 80px 16px 30px !important;
@@ -819,7 +816,7 @@
   }
 }
 
-/* ========== MOBILE BUTTONS ========== */
+
 @media (max-width: 768px) {
   .btn,
   .btn-primary,
@@ -841,7 +838,7 @@
   }
 }
 
-/* ========== MOBILE MODALS ========== */
+
 @media (max-width: 768px) {
   .modal {
     align-items: flex-end !important;
@@ -866,7 +863,7 @@
   }
 }
 
-/* ========== HIDE ON MOBILE ========== */
+
 @media (max-width: 768px) {
   .hide-mobile,
   .desktop-only {
@@ -878,7 +875,7 @@
   }
 }
 
-/* ========== EXTRA SMALL DEVICES ========== */
+
 @media (max-width: 360px) {
   .hero h1,
   .hero-title {

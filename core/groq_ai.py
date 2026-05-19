@@ -14,7 +14,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
-# PDF text extraction
+                     
 try:
     import PyPDF2
     PDF_AVAILABLE = True
@@ -28,7 +28,7 @@ class GroqResumeAnalyzer:
     GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
     
     def __init__(self):
-        # Get API key from environment or settings
+                                                  
         self.api_key = os.environ.get('GROQ_API_KEY', getattr(settings, 'GROQ_API_KEY', '')).strip()
     
     def analyze_resume(self, resume_text: str, job_description: str = None) -> dict:
@@ -143,7 +143,7 @@ Provide your analysis in the exact JSON format specified. Be specific and helpfu
             result = response.json()
             ai_content = result['choices'][0]['message']['content']
             
-            # Parse JSON response
+                                 
             try:
                 analysis = json.loads(ai_content)
                 return {
@@ -151,7 +151,7 @@ Provide your analysis in the exact JSON format specified. Be specific and helpfu
                     'analysis': analysis
                 }
             except json.JSONDecodeError:
-                # Try to extract JSON from response
+                                                   
                 json_match = re.search(r'\{.*\}', ai_content, re.DOTALL)
                 if json_match:
                     analysis = json.loads(json_match.group())
@@ -252,14 +252,14 @@ class GroqResumeAnalysisView(APIView):
     - job_description: Optional target job description
     """
     
-    permission_classes = [AllowAny]  # Allow without login for demo
+    permission_classes = [AllowAny]                                
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     
     def post(self, request):
         resume_text = ""
         job_description = request.data.get('job_description', '')
         
-        # Check for file upload
+                               
         if 'resume_file' in request.FILES:
             uploaded_file = request.FILES['resume_file']
             file_name = uploaded_file.name.lower()
@@ -272,8 +272,8 @@ class GroqResumeAnalysisView(APIView):
                         'error': 'Could not extract text from PDF. Please ensure the PDF contains readable text.'
                     }, status=status.HTTP_400_BAD_REQUEST)
             elif file_name.endswith(('.doc', '.docx')):
-                # For .doc/.docx, we'd need python-docx library
-                # For now, ask user to paste text
+                                                               
+                                                 
                 return Response({
                     'success': False,
                     'error': 'DOC/DOCX files require additional processing. Please paste your resume text instead.'
@@ -284,7 +284,7 @@ class GroqResumeAnalysisView(APIView):
                     'error': 'Unsupported file format. Please upload PDF or paste resume text.'
                 }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Check for text input
+                              
         elif 'resume_text' in request.data:
             resume_text = request.data.get('resume_text', '').strip()
         
@@ -300,7 +300,7 @@ class GroqResumeAnalysisView(APIView):
                 'error': 'Resume text is too short. Please provide complete resume content.'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Perform AI analysis
+                             
         analyzer = GroqResumeAnalyzer()
         result = analyzer.analyze_resume(resume_text, job_description)
         
@@ -317,7 +317,7 @@ class GroqDemoAnalysisView(APIView):
     permission_classes = [AllowAny]
     
     def get(self, request):
-        # Sample resume for demo
+                                
         sample_resume = """
 RAHUL SHARMA
 Software Developer

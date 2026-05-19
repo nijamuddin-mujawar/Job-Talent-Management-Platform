@@ -37,7 +37,7 @@ class Job(models.Model):
         ('office', 'Office'),
     ]
     
-    # Basic Info
+                
     title = models.CharField(max_length=200)
     company = models.CharField(max_length=150)
     location = models.CharField(max_length=100)
@@ -46,17 +46,17 @@ class Job(models.Model):
     experience_level = models.CharField(max_length=20, choices=EXPERIENCE_CHOICES, default='entry')
     work_mode = models.CharField(max_length=20, choices=WORK_MODE_CHOICES, default='office')
     
-    # Salary Info
+                 
     min_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     max_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     salary_display = models.CharField(max_length=50, help_text="e.g., ₹8-15 LPA")
     
-    # Job Details
+                 
     description = models.TextField()
     requirements = models.TextField(null=True, blank=True)
     skills = models.JSONField(default=list, help_text="List of required skills")
     
-    # Company Info
+                  
     company_logo = models.CharField(max_length=10, default='🏢', help_text="Emoji for company logo")
     company_size = models.CharField(max_length=20, choices=[
         ('startup', 'Startup (1-50)'),
@@ -65,7 +65,7 @@ class Job(models.Model):
         ('large', 'Large (1000+)'),
     ], default='medium')
     
-    # Timestamps
+                
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
@@ -94,33 +94,33 @@ class JobApplication(models.Model):
         ('hired', 'Hired'),
     ]
     
-    # Relations - User field optional for now (guest applications allowed)
+                                                                          
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='applications', null=True, blank=True)
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='applications')
     
-    # Application Details
+                         
     full_name = models.CharField(max_length=200)
     email = models.EmailField()
     phone = models.CharField(max_length=15)
     current_position = models.CharField(max_length=200, blank=True)
     experience_years = models.IntegerField(default=0)
     
-    # Files
+           
     resume = models.FileField(upload_to='applications/resumes/', help_text="Upload your resume (PDF/DOC)")
     cover_letter = models.TextField(blank=True, help_text="Tell us why you're perfect for this role")
     
-    # Additional Info
+                     
     linkedin_url = models.URLField(blank=True)
     portfolio_url = models.URLField(blank=True)
     expected_salary = models.CharField(max_length=50, blank=True)
     notice_period = models.CharField(max_length=100, blank=True, help_text="e.g., Immediate, 1 month, 2 months")
     
-    # Status & Tracking
+                       
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     applied_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     
-    # HR Notes (Internal use)
+                             
     hr_notes = models.TextField(blank=True, help_text="Internal notes for HR team")
     
     class Meta:
@@ -170,7 +170,7 @@ class JobApplication(models.Model):
         ('office', 'Office'),
     ]
     
-    # Basic Info
+                
     title = models.CharField(max_length=200)
     company = models.CharField(max_length=150)
     location = models.CharField(max_length=100)
@@ -179,17 +179,17 @@ class JobApplication(models.Model):
     experience_level = models.CharField(max_length=20, choices=EXPERIENCE_CHOICES, default='entry')
     work_mode = models.CharField(max_length=20, choices=WORK_MODE_CHOICES, default='office')
     
-    # Salary Info
+                 
     min_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     max_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     salary_display = models.CharField(max_length=50, help_text="e.g., ₹8-15 LPA")
     
-    # Job Details
+                 
     description = models.TextField()
     requirements = models.TextField(null=True, blank=True)
     skills = models.JSONField(default=list, help_text="List of required skills")
     
-    # Company Info
+                  
     company_logo = models.CharField(max_length=10, default='🏢', help_text="Emoji for company logo")
     company_size = models.CharField(max_length=20, choices=[
         ('startup', 'Startup (1-50)'),
@@ -198,7 +198,7 @@ class JobApplication(models.Model):
         ('large', 'Large (1000+)'),
     ], default='medium')
     
-    # Timestamps
+                
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)

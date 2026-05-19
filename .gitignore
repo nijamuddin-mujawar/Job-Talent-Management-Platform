@@ -1,4 +1,3 @@
-# Python
 __pycache__/
 *.py[cod]
 *.so
@@ -8,33 +7,26 @@ dist/
 build/
 eggs/
 
-# Virtual Environment
 venv/
 env/
 .venv/
 
-# Django
 *.log
 local_settings.py
 db.sqlite3
 media/
 
-# Static files (collected)
 staticfiles/
 
-# Environment variables
 .env
 .env.local
 
-# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS
 .DS_Store
 Thumbs.db
 
-# Backup files
 backups/

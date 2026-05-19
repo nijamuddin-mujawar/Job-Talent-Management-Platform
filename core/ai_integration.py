@@ -15,7 +15,7 @@ from django.core.cache import cache
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
-# Optional imports with fallbacks
+                                 
 try:
     import openai
     OPENAI_AVAILABLE = True
@@ -32,7 +32,7 @@ class AIResumeAnalyzer:
     """AI-powered resume analysis using OpenAI GPT"""
     
     def __init__(self):
-        # OpenAI API key (add to settings.py: OPENAI_API_KEY)
+                                                             
         if OPENAI_AVAILABLE:
             openai.api_key = getattr(settings, 'OPENAI_API_KEY', 'sk-your-openai-key-here')
     
@@ -92,17 +92,17 @@ class AIResumeAnalyzer:
                 temperature=0.3
             )
             
-            # Parse AI response
+                               
             ai_response = response.choices[0].message.content
             
-            # Try to extract JSON from response
+                                               
             try:
-                # Find JSON in the response
+                                           
                 json_match = re.search(r'\{.*\}', ai_response, re.DOTALL)
                 if json_match:
                     analysis = json.loads(json_match.group())
                 else:
-                    # Fallback structured response
+                                                  
                     analysis = self._parse_text_response(ai_response)
             except json.JSONDecodeError:
                 analysis = self._parse_text_response(ai_response)
@@ -186,25 +186,25 @@ class AIJobMatcher:
                 temperature=0.2
             )
             
-            # Process AI matching results
+                                         
             ai_response = response.choices[0].message.content
             
-            # Here you would parse the AI response and rank jobs
-            # For now, return a structured response
+                                                                
+                                                   
             return self._process_job_matches(ai_response, available_jobs)
             
         except Exception as e:
-            # Fallback to rule-based matching
+                                             
             return self._fallback_job_matching(user_profile, available_jobs)
     
     def _process_job_matches(self, ai_response: str, jobs: List[Dict]) -> List[Dict]:
         """Process AI matching response"""
-        # Enhanced job matching based on AI analysis
+                                                    
         matched_jobs = []
         for i, job in enumerate(jobs):
             matched_jobs.append({
                 **job,
-                'ai_match_score': 85 - (i * 5),  # Simulated score
+                'ai_match_score': 85 - (i * 5),                   
                 'ai_reasoning': f"Good match based on skills and experience",
                 'match_factors': ["Skills alignment", "Experience level", "Location fit"]
             })
@@ -213,9 +213,9 @@ class AIJobMatcher:
     
     def _fallback_job_matching(self, profile: Dict, jobs: List[Dict]) -> List[Dict]:
         """Fallback rule-based job matching"""
-        # Simple matching algorithm when AI is unavailable
+                                                          
         for job in jobs:
-            job['match_score'] = 75  # Default score
+            job['match_score'] = 75                 
             job['match_reasoning'] = "Rule-based matching applied"
         
         return jobs
@@ -264,7 +264,7 @@ class AIInterviewPrep:
             
             ai_response = response.choices[0].message.content
             
-            # Parse and structure the questions
+                                               
             return self._parse_interview_questions(ai_response)
             
         except Exception as e:
@@ -272,7 +272,7 @@ class AIInterviewPrep:
     
     def _parse_interview_questions(self, ai_response: str) -> List[Dict]:
         """Parse AI-generated interview questions"""
-        # Extract questions from AI response
+                                            
         questions = []
         lines = ai_response.split('\n')
         
@@ -285,7 +285,7 @@ class AIInterviewPrep:
                     'tips': 'Structure your answer using STAR method'
                 })
         
-        return questions[:10]  # Limit to 10 questions
+        return questions[:10]                         
     
     def _get_fallback_questions(self, job_title: str, experience_level: str) -> List[Dict]:
         """Fallback questions when AI is unavailable"""
@@ -310,7 +310,7 @@ class AIInterviewPrep:
             }
         ]
 
-# API Views for AI features
+                           
 class AIResumeAnalysisView(APIView):
     """API endpoint for AI resume analysis"""
     permission_classes = [IsAuthenticated]
@@ -324,18 +324,18 @@ class AIResumeAnalysisView(APIView):
                 'error': 'Resume text is required'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Check cache first
+                           
         cache_key = f"resume_analysis_{request.user.id}_{hash(resume_text)}"
         cached_result = cache.get(cache_key)
         
         if cached_result:
             return Response(cached_result)
         
-        # Perform AI analysis
+                             
         analyzer = AIResumeAnalyzer()
         result = analyzer.analyze_resume_content(resume_text, job_description)
         
-        # Cache for 1 hour
+                          
         cache.set(cache_key, result, 3600)
         
         return Response(result)
@@ -348,11 +348,11 @@ class AIJobMatchingView(APIView):
         from jobs.models import Job
         from accounts.serializers import ProfileSerializer
         
-        # Get user profile
+                          
         profile_serializer = ProfileSerializer(request.user)
         user_profile = profile_serializer.data
         
-        # Get available jobs
+                            
         jobs = Job.objects.filter(is_active=True)[:10]
         job_data = [
             {
@@ -366,7 +366,7 @@ class AIJobMatchingView(APIView):
             for job in jobs
         ]
         
-        # AI matching
+                     
         matcher = AIJobMatcher()
         matched_jobs = matcher.match_jobs_to_profile(user_profile, job_data)
         
@@ -384,14 +384,14 @@ class AIInterviewPrepView(APIView):
         company = request.data.get('company', 'Tech Company')
         experience_level = request.data.get('experience_level', 'mid-level')
         
-        # Check cache
+                     
         cache_key = f"interview_prep_{hash(job_title + company + experience_level)}"
         cached_questions = cache.get(cache_key)
         
         if cached_questions:
             return Response(cached_questions)
         
-        # Generate AI questions
+                               
         interview_prep = AIInterviewPrep()
         questions = interview_prep.generate_interview_questions(
             job_title, company, experience_level
@@ -409,12 +409,12 @@ class AIInterviewPrepView(APIView):
             'company': company
         }
         
-        # Cache for 24 hours
+                            
         cache.set(cache_key, result, 86400)
         
         return Response(result)
 
-# Add these URLs to accounts/urls.py:
+                                     
 """
 from django.urls import path
 from .ai_views import AIResumeAnalysisView, AIJobMatchingView, AIInterviewPrepView

@@ -30,18 +30,18 @@ def cache_result(timeout=300, key_prefix='skillconnect'):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            # Create cache key from function name and arguments
+                                                               
             cache_key = f"{key_prefix}:{func.__name__}:{hashlib.md5(str(args).encode() + str(kwargs).encode()).hexdigest()}"
             
-            # Try to get from cache first
+                                         
             result = cache.get(cache_key)
             if result is not None:
                 return result
             
-            # If not in cache, execute function
+                                               
             result = func(*args, **kwargs)
             
-            # Store in cache
+                            
             cache.set(cache_key, result, timeout=timeout)
             return result
         return wrapper
@@ -76,7 +76,7 @@ class QueryOptimizer:
             if 'min_salary' in filters:
                 queryset = queryset.filter(salary_min__gte=filters['min_salary'])
         
-        return queryset.order_by('-posted_date')[:50]  # Limit results
+        return queryset.order_by('-posted_date')[:50]                 
 
 class CacheManager:
     """Centralized cache management"""
@@ -92,7 +92,7 @@ class CacheManager:
         return cache.get(cache_key)
     
     @classmethod
-    def set_user_profile(cls, user_id, profile_data, timeout=1800):  # 30 minutes
+    def set_user_profile(cls, user_id, profile_data, timeout=1800):              
         """Cache user profile data"""
         cache_key = cls.USER_PROFILE_CACHE_KEY.format(user_id)
         cache.set(cache_key, profile_data, timeout=timeout)
@@ -110,7 +110,7 @@ class CacheManager:
         return cache.get(cache_key)
     
     @classmethod
-    def set_job_listings(cls, filters_hash, job_data, timeout=600):  # 10 minutes
+    def set_job_listings(cls, filters_hash, job_data, timeout=600):              
         """Cache job listings"""
         cache_key = cls.JOB_LISTINGS_CACHE_KEY.format(filters_hash)
         cache.set(cache_key, job_data, timeout=timeout)
@@ -163,7 +163,7 @@ class PerformanceMonitor:
             result = func(*args, **kwargs)
             execution_time = time.time() - start_time
             
-            if execution_time > 1.0:  # Log slow queries (>1 second)
+            if execution_time > 1.0:                                
                 import logging
                 logger = logging.getLogger('performance')
                 logger.warning(f"Slow query detected: {func.__name__} took {execution_time:.2f}s")
@@ -174,7 +174,7 @@ class PerformanceMonitor:
     @staticmethod
     def log_cache_hit_rate():
         """Log cache hit rates for monitoring"""
-        # This would integrate with Redis or cache backend
+                                                          
         pass
 
 class LazyLoadingMixin:
@@ -197,13 +197,13 @@ class LazyLoadingMixin:
             'current_page': page_obj.number
         }
 
-# Performance optimization utilities
+                                    
 def optimize_image_upload(image_file, max_size=(800, 600), quality=85):
     """Optimize uploaded images for performance"""
     from PIL import Image
     import io
     
-    if image_file.size > 1024 * 1024:  # If larger than 1MB
+    if image_file.size > 1024 * 1024:                      
         img = Image.open(image_file)
         img.thumbnail(max_size, Image.Resampling.LANCZOS)
         
@@ -224,7 +224,7 @@ def batch_database_operations(operations, batch_size=100):
             for operation in batch:
                 operation()
 
-# Example usage in views:
+                         
 """
 # In your views.py:
 

@@ -49,11 +49,11 @@ class CustomUserModelTest(TestCase):
         """Test email uniqueness"""
         User.objects.create_user(**self.user_data)
         
-        # Try to create another user with same email
+                                                    
         with self.assertRaises(Exception):
             User.objects.create_user(
                 username='testuser2',
-                email='test@skillconnect.com',  # Same email
+                email='test@skillconnect.com',              
                 password='password123'
             )
 
@@ -144,7 +144,7 @@ class SkillModelTest(TestCase):
         
         self.assertEqual(skill.name, 'Python')
         self.assertEqual(skill.level, 4)
-        self.assertEqual(skill.level_percentage, 80)  # 4 * 20 = 80%
+        self.assertEqual(skill.level_percentage, 80)                
         
     def test_skill_level_percentage(self):
         """Test skill level percentage calculation"""
@@ -154,7 +154,7 @@ class SkillModelTest(TestCase):
             level=3
         )
         
-        self.assertEqual(skill.level_percentage, 60)  # 3 * 20 = 60%
+        self.assertEqual(skill.level_percentage, 60)                
 
 class UserRegistrationAPITest(APITestCase):
     """Test user registration API"""
@@ -181,7 +181,7 @@ class UserRegistrationAPITest(APITestCase):
             format='json'
         )
         
-        # Check if user was created
+                                   
         self.assertTrue(User.objects.filter(email='newuser@skillconnect.com').exists())
 
 class UserLoginAPITest(APITestCase):
@@ -191,7 +191,7 @@ class UserLoginAPITest(APITestCase):
         self.client = APIClient()
         self.login_url = '/api/accounts/login/'
         
-        # Create test user
+                          
         self.user = User.objects.create_user(
             username='testuser',
             email='test@skillconnect.com',
@@ -211,7 +211,7 @@ class UserLoginAPITest(APITestCase):
             format='json'
         )
         
-        # Should return JWT tokens
+                                  
         if response.status_code == 200:
             self.assertIn('access', response.data)
             self.assertIn('refresh', response.data)

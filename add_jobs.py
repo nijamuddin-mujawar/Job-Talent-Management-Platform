@@ -188,7 +188,7 @@ jobs_data = [
         "company_size": "large",
         "is_active": True
     },
-    # New Jobs Added
+                    
     {
         "title": "React Native Developer",
         "company": "Paytm",

@@ -19,7 +19,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_phone_number(self, value):
-        phone = re.sub(r'\D', '', value)  # Remove non-digits
+        phone = re.sub(r'\D', '', value)                     
         if len(phone) != 10:
             raise serializers.ValidationError("Phone number must be exactly 10 digits")
         return phone
@@ -32,8 +32,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        validated_data.pop('confirm_password')  # ✅ Remove non-model field
-        validated_data['username'] = validated_data.get('email')  # ✅ Required for create_user
+        validated_data.pop('confirm_password')                            
+        validated_data['username'] = validated_data.get('email')                              
         user = CustomUser.objects.create_user(**validated_data)
         return user
 
@@ -108,4 +108,4 @@ class SkillSerializer(serializers.ModelSerializer):
         value = value.strip()
         if not value:
             raise serializers.ValidationError("Skill name cannot be empty")
-        return value.title()  # Capitalize first letter of each word
+        return value.title()                                        

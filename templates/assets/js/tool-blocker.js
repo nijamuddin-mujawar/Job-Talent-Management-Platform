@@ -1,17 +1,14 @@
-// Beautiful Auth Modal - Matches SkillConnect Style
 function checkAuth() {
     const token = localStorage.getItem('access_token');
     return token ? true : false;
 }
 
 function showBeautifulAuthModal(toolName, toolUrl) {
-    // Remove any existing modal
     const existingModal = document.getElementById('skillconnect-auth-modal');
     if (existingModal) {
         existingModal.remove();
     }
 
-    // Create modal with your website's style
     const modal = document.createElement('div');
     modal.id = 'skillconnect-auth-modal';
     modal.innerHTML = `
@@ -294,7 +291,6 @@ function showBeautifulAuthModal(toolName, toolUrl) {
         </div>
     `;
 
-    // Add smooth animations
     const style = document.createElement('style');
     style.textContent = `
         @keyframes modalFadeIn {
@@ -317,7 +313,6 @@ function showBeautifulAuthModal(toolName, toolUrl) {
     document.body.appendChild(modal);
     document.body.style.overflow = 'hidden';
 
-    // Close on background click
     modal.addEventListener('click', function(e) {
         if (e.target === modal) {
             closeAuthModal();
@@ -354,33 +349,26 @@ function goToRegister(returnUrl = '') {
     window.location.href = `register.html?next=${currentPage}`;
 }
 
-// Main blocking functions
 function blockTool(toolName, toolUrl) {
     if (checkAuth()) {
-        // User logged in - allow access
         window.location.href = toolUrl;
         return true;
     } else {
-        // Show beautiful modal
         showBeautifulAuthModal(toolName, toolUrl);
         return false;
     }
 }
 
-// For job applications  
 function blockJobApply(jobId) {
     if (checkAuth()) {
-        // User logged in - allow apply
         window.location.href = `apply-simple.html?job=${jobId}`;
         return true;
     } else {
-        // Show beautiful modal for job apply
         showBeautifulAuthModal('job applications', `apply-simple.html?job=${jobId}`);
         return false;
     }
 }
 
-// Add fade out animation
 const fadeOutStyle = document.createElement('style');
 fadeOutStyle.textContent = `
     @keyframes modalFadeOut {
