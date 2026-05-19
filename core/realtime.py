@@ -655,39 +655,3 @@ const notificationStyles = `
 
 document.head.insertAdjacentHTML('beforeend', notificationStyles);
 """
-
-"""Example Channels installation and ASGI configuration snippet.
-channels==4.0.0
-channels-redis==4.1.0
-redis==5.0.1
-
-INSTALLED_APPS = [
-    'channels',
-]
-
-ASGI_APPLICATION = 'core.asgi.application'
-
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
-        },
-    },
-}
-
-import os
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-from django.core.asgi import get_asgi_application
-from core.realtime import websocket_urlpatterns
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
-
-application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(
-        URLRouter(websocket_urlpatterns)
-    ),
-})
-"""

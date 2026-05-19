@@ -217,25 +217,3 @@ def batch_database_operations(operations, batch_size=100):
             batch = operations[i:i + batch_size]
             for operation in batch:
                 operation()
-
-"""Example usage for caching and query optimization in views.
-
-from .performance import cache_result, CacheManager, QueryOptimizer
-
-class OptimizedUserProfileView(APIView):
-    
-    @cache_result(timeout=1800, key_prefix='user_profile')
-    def get_user_profile_data(self, user_id):
-        return QueryOptimizer.optimize_user_profile_query(user_id)
-    
-    def get(self, request):
-        user_id = request.user.id
-        
-        profile_data = CacheManager.get_user_profile(user_id)
-        if not profile_data:
-            profile_data = self.get_user_profile_data(user_id)
-            CacheManager.set_user_profile(user_id, profile_data)
-        
-        serializer = UserProfileSerializer(profile_data)
-        return Response(serializer.data)
-"""
