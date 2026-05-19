@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 
-# Load .env file manually if exists
 env_file = Path(__file__).resolve().parent.parent / '.env'
 if env_file.exists():
     with open(env_file) as f:
@@ -23,12 +22,10 @@ if env_file.exists():
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-7_i=ddw24n81(1!3%8urdz+ssy9axw9r&lq%4&*yo%unfecg59')
 
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
-# Allowed Hosts - Local + Cloud
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
@@ -40,7 +37,6 @@ ALLOWED_HOSTS = [
     'admin.skillconnect.dev',
 ]
 
-# CSRF Trusted Origins (for production)
 CSRF_TRUSTED_ORIGINS = [
     'https://skillconnect.dev',
     'https://www.skillconnect.dev',
@@ -51,7 +47,6 @@ CSRF_TRUSTED_ORIGINS = [
 
 
 
-# ✅ Installed apps with optional dependencies
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -64,13 +59,11 @@ INSTALLED_APPS = [
     'cloudinary',          # ✅ Cloud image storage
     'cloudinary_storage',  # ✅ Django cloudinary storage
     
-    # Local apps
     'accounts', 
     'newsletter.apps.NewsletterConfig',  # ✅ Newsletter app with proper config
     'jobs',               # ✅ Jobs app
 ]
 
-# Optional apps - add only if installed
 try:
     import drf_yasg
     INSTALLED_APPS.append('drf_yasg')  # ✅ API Documentation
@@ -83,7 +76,6 @@ try:
 except ImportError:
     pass
 
-# ✅ Middleware (CORS added at top)
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -97,7 +89,6 @@ MIDDLEWARE = [
     'django.middleware.gzip.GZipMiddleware',  # ⚡ Compress responses
 ]
 
-# Add debug toolbar middleware only if installed
 try:
     import debug_toolbar
     MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
@@ -123,14 +114,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-# ✅ Database Configuration (Auto-detect: Local MySQL or Cloud PostgreSQL)
 import dj_database_url
 
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
-# Check if DATABASE_URL is valid (not empty, not a placeholder)
 if DATABASE_URL and not DATABASE_URL.startswith('${'):
-    # 🌐 Cloud/Production (PostgreSQL via DATABASE_URL)
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
@@ -139,7 +127,6 @@ if DATABASE_URL and not DATABASE_URL.startswith('${'):
         )
     }
 else:
-    # 🏠 Local Development (XAMPP MySQL)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
@@ -156,10 +143,8 @@ else:
         }
     }
 
-# ✅ Custom user model
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
-# ✅ Password validators
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -167,44 +152,36 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# ✅ Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 USE_TZ = True
 
-# ✅ Static files
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# ✅ Media files - Use Cloudinary in production
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# ✅ Cloudinary Configuration (for cloud image storage)
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', 'dhr28ygvm'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
 }
 
-# Use Cloudinary for media files in production
 if not DEBUG:
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ⚡ Performance Optimizations
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB - Faster file uploads
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
 
-# Session optimization
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Database sessions
 SESSION_COOKIE_AGE = 86400  # 1 day
 SESSION_SAVE_EVERY_REQUEST = False  # Don't save on every request
 
-# ✅ CORS settings - Allow all origins and methods
 CORS_ALLOW_ALL_ORIGINS = True  # For development only
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
@@ -234,7 +211,6 @@ REST_FRAMEWORK = {
     )
 }
 
-# ✅ JWT Configuration - Extended Token Life
 from datetime import timedelta
 
 SIMPLE_JWT = {
@@ -250,7 +226,6 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
-# ✅ Swagger/OpenAPI Configuration
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'Bearer': {
@@ -275,7 +250,6 @@ REDOC_SETTINGS = {
     'LAZY_RENDERING': False,
 }
 
-# ✅ Debug Toolbar Configuration
 INTERNAL_IPS = [
     '127.0.0.1',
     'localhost',
@@ -285,15 +259,10 @@ DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,
 }
 
-# ✅ Third-party Integration Settings (Removed OAuth for simplicity)
-# OpenAI Configuration for AI features (if needed later)
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', 'your-openai-api-key')
 
-# ✅ Email Configuration
-# Uses environment variables for production, console for development
 
 if os.environ.get('EMAIL_HOST_USER'):
-    # 🚀 Production Mode: Real Email via Gmail SMTP
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'smtp.gmail.com'
     EMAIL_PORT = 587
@@ -302,16 +271,6 @@ if os.environ.get('EMAIL_HOST_USER'):
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
     DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER')
 else:
-    # Development Mode: Emails print in console
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     DEFAULT_FROM_EMAIL = 'noreply@skillconnect.dev'
 
-# 📧 Email Setup Instructions for Production:
-# 1. Go to Google Account: https://myaccount.google.com
-# 2. Enable 2-Step Verification (Security > 2-Step Verification)
-# 3. Create App Password: https://myaccount.google.com/apppasswords
-#    - Select App: Mail, Device: Other (SkillConnect)
-#    - Copy the 16-character password
-# 4. Add these Environment Variables in Render:
-#    EMAIL_HOST_USER = your-gmail@gmail.com
-#    EMAIL_HOST_PASSWORD = xxxx-xxxx-xxxx-xxxx (App Password)

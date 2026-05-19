@@ -49,7 +49,6 @@ class CustomUserModelTest(TestCase):
         """Test email uniqueness"""
         User.objects.create_user(**self.user_data)
         
-        # Try to create another user with same email
         with self.assertRaises(Exception):
             User.objects.create_user(
                 username='testuser2',
@@ -181,7 +180,6 @@ class UserRegistrationAPITest(APITestCase):
             format='json'
         )
         
-        # Check if user was created
         self.assertTrue(User.objects.filter(email='newuser@skillconnect.com').exists())
 
 class UserLoginAPITest(APITestCase):
@@ -191,7 +189,6 @@ class UserLoginAPITest(APITestCase):
         self.client = APIClient()
         self.login_url = '/api/accounts/login/'
         
-        # Create test user
         self.user = User.objects.create_user(
             username='testuser',
             email='test@skillconnect.com',
@@ -211,7 +208,6 @@ class UserLoginAPITest(APITestCase):
             format='json'
         )
         
-        # Should return JWT tokens
         if response.status_code == 200:
             self.assertIn('access', response.data)
             self.assertIn('refresh', response.data)

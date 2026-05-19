@@ -30,18 +30,14 @@ def cache_result(timeout=300, key_prefix='skillconnect'):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            # Create cache key from function name and arguments
             cache_key = f"{key_prefix}:{func.__name__}:{hashlib.md5(str(args).encode() + str(kwargs).encode()).hexdigest()}"
             
-            # Try to get from cache first
             result = cache.get(cache_key)
             if result is not None:
                 return result
             
-            # If not in cache, execute function
             result = func(*args, **kwargs)
             
-            # Store in cache
             cache.set(cache_key, result, timeout=timeout)
             return result
         return wrapper
@@ -174,7 +170,6 @@ class PerformanceMonitor:
     @staticmethod
     def log_cache_hit_rate():
         """Log cache hit rates for monitoring"""
-        # This would integrate with Redis or cache backend
         pass
 
 class LazyLoadingMixin:
@@ -197,7 +192,6 @@ class LazyLoadingMixin:
             'current_page': page_obj.number
         }
 
-# Performance optimization utilities
 def optimize_image_upload(image_file, max_size=(800, 600), quality=85):
     """Optimize uploaded images for performance"""
     from PIL import Image
@@ -224,9 +218,7 @@ def batch_database_operations(operations, batch_size=100):
             for operation in batch:
                 operation()
 
-# Example usage in views:
 """
-# In your views.py:
 
 from .performance import cache_result, CacheManager, QueryOptimizer
 
@@ -239,7 +231,6 @@ class OptimizedUserProfileView(APIView):
     def get(self, request):
         user_id = request.user.id
         
-        # Try cache first
         profile_data = CacheManager.get_user_profile(user_id)
         if not profile_data:
             profile_data = self.get_user_profile_data(user_id)
