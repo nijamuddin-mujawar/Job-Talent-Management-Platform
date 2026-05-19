@@ -29,7 +29,7 @@ class SkillAdmin(admin.ModelAdmin):
     list_filter = ['level', 'created_at']
     search_fields = ['name', 'user__email']
     ordering = ['user', '-level', 'name']
-    
+
     def level_percentage(self, obj):
         return f"{obj.level_percentage}%"
     level_percentage.short_description = 'Level %'

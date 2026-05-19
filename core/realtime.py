@@ -18,56 +18,56 @@ logger = logging.getLogger(__name__)
 
 class NotificationConsumer(AsyncWebsocketConsumer):
     """WebSocket consumer for real-time notifications"""
-    
+
     async def connect(self):
         """Handle WebSocket connection"""
         self.user = self.scope["user"]
-        
-        # Only allow authenticated users
+
+
         if self.user == AnonymousUser:
             await self.close()
             return
-        
-        # Create user-specific group
+
+
         self.notification_group = f"notifications_{self.user.id}"
-        
-        # Join notification group
+
+
         await self.channel_layer.group_add(
             self.notification_group,
             self.channel_name
         )
-        
-        # Accept connection
+
+
         await self.accept()
-        
-        # Mark user as online
+
+
         await self.update_user_status(online=True)
-        
-        # Send initial data
+
+
         await self.send_initial_notifications()
-        
+
         logger.info(f"User {self.user.email} connected to notifications")
-    
+
     async def disconnect(self, close_code):
         """Handle WebSocket disconnection"""
         if hasattr(self, 'notification_group'):
-            # Leave notification group
+
             await self.channel_layer.group_discard(
                 self.notification_group,
                 self.channel_name
             )
-        
-        # Mark user as offline
+
+
         if hasattr(self, 'user') and self.user != AnonymousUser:
             await self.update_user_status(online=False)
             logger.info(f"User {self.user.email} disconnected from notifications")
-    
+
     async def receive(self, text_data):
         """Handle incoming WebSocket messages"""
         try:
             data = json.loads(text_data)
             message_type = data.get('type')
-            
+
             if message_type == 'mark_notification_read':
                 await self.mark_notification_read(data.get('notification_id'))
             elif message_type == 'get_online_users':
@@ -77,31 +77,31 @@ class NotificationConsumer(AsyncWebsocketConsumer):
                     'type': 'pong',
                     'timestamp': datetime.now().isoformat()
                 }))
-                
+
         except json.JSONDecodeError:
             await self.send(text_data=json.dumps({
                 'type': 'error',
                 'message': 'Invalid JSON data'
             }))
-    
+
     async def send_initial_notifications(self):
         """Send initial notifications when user connects"""
-        # Get unread notifications from database
+
         notifications = await self.get_user_notifications()
-        
+
         await self.send(text_data=json.dumps({
             'type': 'initial_notifications',
             'notifications': notifications,
             'count': len([n for n in notifications if not n['read']])
         }))
-    
+
     async def notification_message(self, event):
         """Handle notification message from group"""
         await self.send(text_data=json.dumps({
             'type': 'new_notification',
             'notification': event['notification']
         }))
-    
+
     async def job_alert(self, event):
         """Handle job alert notification"""
         await self.send(text_data=json.dumps({
@@ -109,7 +109,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'job': event['job'],
             'message': f"New job match found: {event['job']['title']}"
         }))
-    
+
     async def application_update(self, event):
         """Handle job application status update"""
         await self.send(text_data=json.dumps({
@@ -117,12 +117,12 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'application': event['application'],
             'message': f"Application status updated: {event['application']['status']}"
         }))
-    
+
     @sync_to_async
     def get_user_notifications(self):
         """Get user notifications from database"""
-        # This would fetch from your notification model
-        # For now, returning mock data
+
+
         return [
             {
                 'id': 1,
@@ -141,42 +141,42 @@ class NotificationConsumer(AsyncWebsocketConsumer):
                 'created_at': (datetime.now() - timedelta(hours=2)).isoformat()
             }
         ]
-    
+
     @sync_to_async
     def mark_notification_read(self, notification_id: int):
         """Mark notification as read in database"""
-        # This would update notification in database
+
         logger.info(f"Marking notification {notification_id} as read for user {self.user.id}")
-    
+
     async def update_user_status(self, online: bool):
         """Update user online status"""
         status_key = f"user_status:{self.user.id}"
-        
+
         if online:
             cache.set(status_key, {
                 'online': True,
                 'last_seen': datetime.now().isoformat(),
                 'socket_id': self.channel_name
-            }, timeout=300)  # 5 minutes timeout
+            }, timeout=300)
         else:
             cache.set(status_key, {
                 'online': False,
                 'last_seen': datetime.now().isoformat()
-            }, timeout=86400)  # Keep offline status for 24 hours
-    
+            }, timeout=86400)
+
     async def send_online_users(self):
         """Send list of online users"""
         online_users = await self.get_online_users()
-        
+
         await self.send(text_data=json.dumps({
             'type': 'online_users',
             'users': online_users
         }))
-    
+
     async def get_online_users(self):
         """Get list of online users"""
-        # This would query cache for online users
-        # Mock implementation
+
+
         return [
             {'id': 1, 'name': 'John Doe', 'status': 'online'},
             {'id': 2, 'name': 'Jane Smith', 'status': 'online'}
@@ -184,65 +184,65 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
 class JobAlertService:
     """Service for managing real-time job alerts"""
-    
+
     @staticmethod
     async def send_job_alert(user_id: int, job_data: Dict[str, Any]):
         """Send job alert to specific user"""
         channel_layer = get_channel_layer()
         group_name = f"notifications_{user_id}"
-        
+
         await channel_layer.group_send(group_name, {
             'type': 'job_alert',
             'job': job_data
         })
-    
+
     @staticmethod
     async def broadcast_new_job(job_data: Dict[str, Any]):
         """Broadcast new job to all relevant users"""
         channel_layer = get_channel_layer()
-        
-        # This would query users interested in this job type/location
+
+
         interested_users = await JobAlertService.get_interested_users(job_data)
-        
+
         for user_id in interested_users:
             await JobAlertService.send_job_alert(user_id, job_data)
-    
+
     @staticmethod
     async def get_interested_users(job_data: Dict[str, Any]) -> List[int]:
         """Get users interested in this type of job"""
-        # Mock implementation - would query user preferences
-        return [1, 2, 3]  # User IDs
+
+        return [1, 2, 3]
 
 class NotificationService:
     """Service for managing notifications"""
-    
+
     @staticmethod
     async def send_notification(user_id: int, notification: Dict[str, Any]):
         """Send notification to specific user"""
         channel_layer = get_channel_layer()
         group_name = f"notifications_{user_id}"
-        
-        # Save notification to database first
+
+
         await NotificationService.save_notification(user_id, notification)
-        
-        # Send via WebSocket
+
+
         await channel_layer.group_send(group_name, {
             'type': 'notification_message',
             'notification': notification
         })
-    
+
     @staticmethod
     @sync_to_async
     def save_notification(user_id: int, notification: Dict[str, Any]):
         """Save notification to database"""
-        # This would save to your notification model
+
         logger.info(f"Saving notification for user {user_id}: {notification['title']}")
-    
+
     @staticmethod
     async def send_welcome_notification(user_id: int, user_name: str):
         """Send welcome notification to new user"""
         notification = {
-            'id': None,  # Will be set after saving
+            'id': None,
             'title': f'Welcome to SkillConnect, {user_name}!',
             'message': 'Complete your profile to get personalized job recommendations',
             'type': 'welcome',
@@ -255,9 +255,9 @@ class NotificationService:
                 }
             ]
         }
-        
+
         await NotificationService.send_notification(user_id, notification)
-    
+
     @staticmethod
     async def send_job_application_update(user_id: int, application_data: Dict[str, Any]):
         """Send job application status update"""
@@ -270,12 +270,12 @@ class NotificationService:
             'created_at': datetime.now().isoformat(),
             'data': application_data
         }
-        
+
         await NotificationService.send_notification(user_id, notification)
 
 class LiveActivityService:
     """Service for live activity updates"""
-    
+
     @staticmethod
     async def track_user_activity(user_id: int, activity: str, data: Dict[str, Any]):
         """Track and broadcast user activity"""
@@ -285,24 +285,24 @@ class LiveActivityService:
             'data': data,
             'timestamp': datetime.now().isoformat()
         }
-        
-        # Cache recent activity
+
+
         activity_key = f"user_activity:{user_id}"
         recent_activities = cache.get(activity_key, [])
         recent_activities.append(activity_data)
-        
-        # Keep only last 10 activities
+
+
         recent_activities = recent_activities[-10:]
         cache.set(activity_key, recent_activities, timeout=3600)
-        
-        # Broadcast to admin/analytics
+
+
         channel_layer = get_channel_layer()
         await channel_layer.group_send("admin_dashboard", {
             'type': 'user_activity',
             'activity': activity_data
         })
 
-# WebSocket routing configuration
+
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from django.urls import path
@@ -317,7 +317,7 @@ application = ProtocolTypeRouter({
     ),
 })
 
-# Frontend JavaScript Integration
+
 FRONTEND_WEBSOCKET_CODE = """
 // Real-time WebSocket Integration for SkillConnect Frontend
 
@@ -328,67 +328,67 @@ class SkillConnectWebSocket {
         this.reconnectInterval = null;
         this.notifications = [];
         this.onlineUsers = [];
-        
+
         this.connect();
         this.setupEventHandlers();
     }
-    
+
     connect() {
         const token = localStorage.getItem('access_token');
         const wsUrl = `ws://localhost:8000/ws/notifications/?token=${token}`;
-        
+
         this.socket = new WebSocket(wsUrl);
-        
+
         this.socket.onopen = (event) => {
             console.log('✅ WebSocket connected');
             this.clearReconnectInterval();
             this.updateConnectionStatus(true);
         };
-        
+
         this.socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
             this.handleMessage(data);
         };
-        
+
         this.socket.onclose = (event) => {
             console.log('❌ WebSocket disconnected');
             this.updateConnectionStatus(false);
             this.startReconnecting();
         };
-        
+
         this.socket.onerror = (error) => {
             console.error('WebSocket error:', error);
         };
     }
-    
+
     handleMessage(data) {
         switch(data.type) {
             case 'initial_notifications':
                 this.notifications = data.notifications;
                 this.updateNotificationUI();
                 break;
-                
+
             case 'new_notification':
                 this.notifications.unshift(data.notification);
                 this.showNotificationToast(data.notification);
                 this.updateNotificationUI();
                 break;
-                
+
             case 'job_alert':
                 this.showJobAlert(data.job);
                 break;
-                
+
             case 'application_update':
                 this.showApplicationUpdate(data.application);
                 break;
-                
+
             case 'online_users':
                 this.onlineUsers = data.users;
                 this.updateOnlineUsersUI();
                 break;
         }
     }
-    
+
     showNotificationToast(notification) {
         // Create toast notification
         const toast = document.createElement('div');
@@ -400,9 +400,9 @@ class SkillConnectWebSocket {
             </div>
             <div class="toast-body">${notification.message}</div>
         `;
-        
+
         document.body.appendChild(toast);
-        
+
         // Auto-remove after 5 seconds
         setTimeout(() => {
             if (toast.parentElement) {
@@ -410,7 +410,7 @@ class SkillConnectWebSocket {
             }
         }, 5000);
     }
-    
+
     showJobAlert(job) {
         const alert = `
             <div class="job-alert-modal">
@@ -426,29 +426,29 @@ class SkillConnectWebSocket {
                 </div>
             </div>
         `;
-        
+
         document.body.insertAdjacentHTML('beforeend', alert);
     }
-    
+
     updateNotificationUI() {
         const notificationCount = this.notifications.filter(n => !n.read).length;
-        
+
         // Update notification badge
         const badge = document.querySelector('.notification-badge');
         if (badge) {
             badge.textContent = notificationCount;
             badge.style.display = notificationCount > 0 ? 'block' : 'none';
         }
-        
+
         // Update notification dropdown
         this.renderNotificationDropdown();
     }
-    
+
     renderNotificationDropdown() {
         const dropdown = document.querySelector('.notification-dropdown');
         if (!dropdown) return;
-        
-        dropdown.innerHTML = this.notifications.length > 0 ? 
+
+        dropdown.innerHTML = this.notifications.length > 0 ?
             this.notifications.map(n => `
                 <div class="notification-item ${n.read ? 'read' : 'unread'}" data-id="${n.id}">
                     <div class="notification-title">${n.title}</div>
@@ -458,13 +458,13 @@ class SkillConnectWebSocket {
             `).join('') :
             '<div class="no-notifications">No notifications</div>';
     }
-    
+
     markAsRead(notificationId) {
         this.socket.send(JSON.stringify({
             type: 'mark_notification_read',
             notification_id: notificationId
         }));
-        
+
         // Update local state
         const notification = this.notifications.find(n => n.id === notificationId);
         if (notification) {
@@ -472,21 +472,21 @@ class SkillConnectWebSocket {
             this.updateNotificationUI();
         }
     }
-    
+
     startReconnecting() {
         this.reconnectInterval = setInterval(() => {
             console.log('🔄 Attempting to reconnect...');
             this.connect();
         }, 5000);
     }
-    
+
     clearReconnectInterval() {
         if (this.reconnectInterval) {
             clearInterval(this.reconnectInterval);
             this.reconnectInterval = null;
         }
     }
-    
+
     updateConnectionStatus(connected) {
         const statusEl = document.querySelector('.connection-status');
         if (statusEl) {
@@ -494,20 +494,20 @@ class SkillConnectWebSocket {
             statusEl.textContent = connected ? '🟢 Connected' : '🔴 Disconnected';
         }
     }
-    
+
     setupEventHandlers() {
         // Notification dropdown toggle
         document.addEventListener('click', (e) => {
             if (e.target.matches('.notification-bell')) {
                 document.querySelector('.notification-dropdown').classList.toggle('show');
             }
-            
+
             if (e.target.matches('.notification-item')) {
                 const notificationId = parseInt(e.target.dataset.id);
                 this.markAsRead(notificationId);
             }
         });
-        
+
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.notification-container')) {
@@ -515,12 +515,12 @@ class SkillConnectWebSocket {
             }
         });
     }
-    
+
     formatTime(timestamp) {
         const date = new Date(timestamp);
         const now = new Date();
         const diff = now - date;
-        
+
         if (diff < 60000) return 'Just now';
         if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
         if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
@@ -680,7 +680,7 @@ const notificationStyles = `
 document.head.insertAdjacentHTML('beforeend', notificationStyles);
 """
 
-# Installation instructions for channels
+
 """
 # Add to requirements.txt:
 channels==4.0.0

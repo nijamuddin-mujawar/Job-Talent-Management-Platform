@@ -6,8 +6,8 @@ urlpatterns = [
     path('<int:pk>/', views.JobDetailView.as_view(), name='job-detail'),
     path('categories/', views.job_categories, name='job-categories'),
     path('stats/', views.job_stats, name='job-stats'),
-    
-    # Job Applications
+
+
     path('apply/', views.JobApplicationCreateView.as_view(), name='job-apply'),
     path('<int:job_id>/apply/', views.apply_to_job, name='apply-to-job'),
     path('applications/', views.JobApplicationListView.as_view(), name='my-applications'),

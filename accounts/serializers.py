@@ -19,7 +19,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate_phone_number(self, value):
-        phone = re.sub(r'\D', '', value)  # Remove non-digits
+        phone = re.sub(r'\D', '', value)
         if len(phone) != 10:
             raise serializers.ValidationError("Phone number must be exactly 10 digits")
         return phone
@@ -32,22 +32,22 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        validated_data.pop('confirm_password')  # ✅ Remove non-model field
-        validated_data['username'] = validated_data.get('email')  # ✅ Required for create_user
+        validated_data.pop('confirm_password')
+        validated_data['username'] = validated_data.get('email')
         user = CustomUser.objects.create_user(**validated_data)
         return user
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
-    
+
     def validate(self, data):
         user = authenticate(email=data['email'], password=data['password'])
         if not user:
             raise AuthenticationFailed("Invalid email or password")
         if not user.is_active:
             raise AuthenticationFailed("Account is disabled")
-        
+
         refresh = RefreshToken.for_user(user)
         return {
             'access': str(refresh.access_token),
@@ -94,7 +94,7 @@ class EducationSerializer(serializers.ModelSerializer):
 class SkillSerializer(serializers.ModelSerializer):
     level_display = serializers.CharField(source='get_level_display', read_only=True)
     level_percentage = serializers.IntegerField(read_only=True)
-    
+
     class Meta:
         model = Skill
         fields = [
@@ -102,10 +102,10 @@ class SkillSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
-    
+
     def validate_name(self, value):
         """Ensure skill name is not empty and properly formatted"""
         value = value.strip()
         if not value:
             raise serializers.ValidationError("Skill name cannot be empty")
-        return value.title()  # Capitalize first letter of each word
+        return value.title()

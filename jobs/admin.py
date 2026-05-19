@@ -4,14 +4,14 @@ from .models import Job, JobApplication
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
     list_display = ['title', 'company', 'category', 'location', 'job_type', 'salary_display', 'created_at', 'is_active']
-    list_display_links = ['title', 'company']  # Make title and company clickable for editing
+    list_display_links = ['title', 'company']
     list_filter = ['category', 'job_type', 'experience_level', 'work_mode', 'company_size', 'is_active']
     search_fields = ['title', 'company', 'location', 'description']
     ordering = ['-created_at']
     list_editable = ['is_active']
     actions_on_top = True
     actions_on_bottom = True
-    
+
     fieldsets = (
         ('Basic Information', {
             'fields': ('title', 'company', 'location', 'category', 'job_type', 'experience_level', 'work_mode')
@@ -38,7 +38,7 @@ class JobApplicationAdmin(admin.ModelAdmin):
     ordering = ['-applied_at']
     list_editable = ['status']
     readonly_fields = ['applied_at', 'updated_at']
-    
+
     fieldsets = (
         ('Application Info', {
             'fields': ('user', 'job', 'status', 'applied_at', 'updated_at')
@@ -57,7 +57,7 @@ class JobApplicationAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    
+
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         return queryset.select_related('user', 'job')

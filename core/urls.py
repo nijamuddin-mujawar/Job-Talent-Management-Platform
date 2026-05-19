@@ -7,12 +7,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 
-# ✅ Custom Admin Panel Branding
+
 admin.site.site_header = 'SkillConnect Admin Panel'
 admin.site.site_title = 'SkillConnect Admin'
 admin.site.index_title = 'Welcome to SkillConnect Administration'
 
-# Optional imports with fallbacks
+
 try:
     from rest_framework import permissions
     from drf_yasg.views import get_schema_view
@@ -21,28 +21,28 @@ try:
 except ImportError:
     SWAGGER_AVAILABLE = False
 
-# Only create schema if packages are available
+
 if SWAGGER_AVAILABLE:
-    # ✅ Professional API Documentation Schema
+
     schema_view = get_schema_view(
         openapi.Info(
             title="SkillConnect API",
             default_version='v1',
             description="""
             🚀 **Professional Career Platform API**
-            
+
             Complete REST API for SkillConnect - India's comprehensive career development platform.
-            
+
             ## Features:
             - 🔐 JWT Authentication System
-            - 👤 User Profile Management  
+            - 👤 User Profile Management
             - 💼 Job Search & Applications
             - 🛠️ 13 Career Development Tools
             - 📱 Mobile-First Design
-            
+
             ## Authentication:
             Use JWT Bearer tokens: `Authorization: Bearer <your-token>`
-            
+
             ## Rate Limits:
             - Authenticated users: 1000 requests/hour
             - Anonymous users: 100 requests/hour
@@ -58,7 +58,7 @@ if SWAGGER_AVAILABLE:
         permission_classes=(permissions.AllowAny,),
     )
 
-# 🔧 Temporary setup view for creating superuser
+
 from django.http import JsonResponse
 from accounts.models import CustomUser
 from jobs.models import Job
@@ -68,10 +68,10 @@ def setup_admin(request):
     email = 'nijamuddinmujawar77@gmail.com'
     password = 'admin123'
     username = 'admin'
-    
+
     if CustomUser.objects.filter(email=email).exists():
         return JsonResponse({'status': 'exists', 'message': f'Superuser already exists: {email}'})
-    
+
     user = CustomUser.objects.create_superuser(
         username=username,
         email=email,
@@ -95,7 +95,7 @@ def setup_jobs(request):
         {"title": "Content Writer", "company": "Times of India", "location": "Delhi, India", "category": "marketing", "job_type": "full-time", "experience_level": "entry", "work_mode": "office", "min_salary": 200000, "max_salary": 400000, "salary_display": "₹2-4 LPA", "description": "Write engaging articles, blogs, and SEO-optimized content.", "requirements": "Excellent writing skills. SEO knowledge.", "skills": ["Content Writing", "SEO", "Research", "Editing"], "company_logo": "📰", "company_size": "large"},
         {"title": "Sales Executive", "company": "HDFC Bank", "location": "Solapur, India", "category": "sales", "job_type": "full-time", "experience_level": "entry", "work_mode": "office", "min_salary": 250000, "max_salary": 400000, "salary_display": "₹2.5-4 LPA", "description": "Sell banking products and meet monthly sales targets.", "requirements": "Graduate. Good communication. Field work.", "skills": ["Sales", "Communication", "Negotiation", "Banking"], "company_logo": "🏦", "company_size": "large"},
     ]
-    
+
     count = 0
     for job_data in jobs_data:
         job, created = Job.objects.get_or_create(
@@ -105,48 +105,48 @@ def setup_jobs(request):
         )
         if created:
             count += 1
-    
+
     return JsonResponse({'status': 'success', 'message': f'{count} new jobs added. Total: {Job.objects.count()}'})
 
 urlpatterns = [
-    # 🏠 Root redirect to admin panel (for admin.skillconnect.dev)
+
     path('', RedirectView.as_view(url='/admin/', permanent=False)),
-    
-    # 🔧 Admin interface
+
+
     path('admin/', admin.site.urls),
-    
-    # 🚨 TEMPORARY - Setup endpoints (DELETE AFTER USE)
+
+
     path('setup-admin/', setup_admin, name='setup-admin'),
     path('setup-jobs/', setup_jobs, name='setup-jobs'),
-    
-    # 📋 API routes
+
+
     path('api/accounts/', include('accounts.urls')),
     path('api/newsletter/', include('newsletter.urls')),
     path('api/jobs/', include('jobs.urls')),
-    
-    # 🤖 AI Resume Analysis (Groq - FREE)
+
+
     path('api/ai/', include('core.ai_urls')),
 ]
 
-# Add API documentation URLs only if available
+
 if SWAGGER_AVAILABLE:
     urlpatterns += [
-        # 📚 Professional API Documentation
+
         path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='api-docs-swagger'),
         path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='api-docs-redoc'),
         path('api/schema.json', schema_view.without_ui(cache_timeout=0), name='api-schema-json'),
     ]
 
-# ✅ Development configurations
+
 if settings.DEBUG:
-    # Media files serving
+
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    
-    # Debug toolbar (Industry standard development tool)
+
+
     try:
         import debug_toolbar
         urlpatterns = [
             path('__debug__/', include(debug_toolbar.urls)),
         ] + urlpatterns
     except ImportError:
-        pass  # Debug toolbar not installed - no problem
+        pass

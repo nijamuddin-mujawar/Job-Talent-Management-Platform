@@ -11,16 +11,16 @@ from .serializers import LoginSerializer
 from .serializers import ProfileSerializer, WorkExperienceSerializer, EducationSerializer, SkillSerializer
 from .models import WorkExperience, Education, Skill, CustomUser
 
-# ✅ Industry Level Performance Optimization
+
 try:
     from core.performance import cache_result, CacheManager, PerformanceMonitor
 except ImportError:
-    # Fallback if performance module not available
+
     def cache_result(timeout=300, key_prefix=''):
         def decorator(func):
             return func
         return decorator
-    
+
     class CacheManager:
         @classmethod
         def get_user_profile(cls, user_id): return None
@@ -28,7 +28,7 @@ except ImportError:
         def set_user_profile(cls, user_id, data, timeout=1800): pass
         @classmethod
         def invalidate_user_profile(cls, user_id): pass
-    
+
     class PerformanceMonitor:
         @staticmethod
         def measure_query_time(func): return func
@@ -50,7 +50,7 @@ class LoginView(APIView):
         if serializer.is_valid():
             return Response(serializer.validated_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
 
 from rest_framework.permissions import IsAuthenticated
@@ -68,7 +68,7 @@ class ProfileView(APIView):
             serializer.save()
             return Response({'msg': 'Profile updated successfully'})
         return Response(serializer.errors, status=400)
-    
+
     def patch(self, request):
         serializer = ProfileSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
@@ -77,14 +77,14 @@ class ProfileView(APIView):
         return Response(serializer.errors, status=400)
 
 
-# Work Experience Views
+
 class WorkExperienceListCreateView(generics.ListCreateAPIView):
     serializer_class = WorkExperienceSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         return WorkExperience.objects.filter(user=self.request.user)
-    
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -92,19 +92,19 @@ class WorkExperienceListCreateView(generics.ListCreateAPIView):
 class WorkExperienceDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = WorkExperienceSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         return WorkExperience.objects.filter(user=self.request.user)
 
 
-# Education Views
+
 class EducationListCreateView(generics.ListCreateAPIView):
     serializer_class = EducationSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         return Education.objects.filter(user=self.request.user)
-    
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -112,19 +112,19 @@ class EducationListCreateView(generics.ListCreateAPIView):
 class EducationDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = EducationSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         return Education.objects.filter(user=self.request.user)
 
 
-# Skills Views
+
 class SkillListCreateView(generics.ListCreateAPIView):
     serializer_class = SkillSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         return Skill.objects.filter(user=self.request.user)
-    
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -132,12 +132,12 @@ class SkillListCreateView(generics.ListCreateAPIView):
 class SkillDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SkillSerializer
     permission_classes = [IsAuthenticated]
-    
+
     def get_queryset(self):
         return Skill.objects.filter(user=self.request.user)
 
 
-# ========== FORGOT PASSWORD VIEWS ==========
+
 import secrets
 import threading
 import requests
@@ -150,11 +150,11 @@ def send_email_with_resend(to_email, subject, html_content, text_content):
     """Send email using Resend API (works on Render free tier)"""
     try:
         resend_api_key = os.environ.get('RESEND_API_KEY')
-        
+
         if not resend_api_key:
             print("RESEND_API_KEY not set!")
             return False
-        
+
         response = requests.post(
             'https://api.resend.com/emails',
             headers={
@@ -169,14 +169,14 @@ def send_email_with_resend(to_email, subject, html_content, text_content):
                 'text': text_content
             }
         )
-        
+
         if response.status_code == 200:
             print(f"Email sent successfully to {to_email}!")
             return True
         else:
             print(f"Email failed: {response.text}")
             return False
-            
+
     except Exception as e:
         print(f"Email sending failed: {e}")
         return False
@@ -185,28 +185,28 @@ class ForgotPasswordView(APIView):
     """Send password reset email"""
     def post(self, request):
         email = request.data.get('email', '').strip().lower()
-        
+
         if not email:
             return Response({'error': 'Email is required'}, status=400)
-        
+
         try:
             user = CustomUser.objects.get(email=email)
-            
-            # Generate reset token
+
+
             reset_token = secrets.token_urlsafe(32)
-            
-            # Store token in cache (expires in 1 hour)
+
+
             cache_key = f'password_reset_{reset_token}'
-            cache.set(cache_key, user.id, timeout=3600)  # 1 hour
-            
-            # Create reset link
+            cache.set(cache_key, user.id, timeout=3600)
+
+
             frontend_url = 'https://skillconnect.dev'
             reset_link = f'{frontend_url}/reset-password.html?token={reset_token}'
-            
-            # Get user name
+
+
             user_name = user.first_name or user.email.split('@')[0]
-            
-            # Professional HTML Email Template
+
+
             html_content = f'''
 <!DOCTYPE html>
 <html>
@@ -240,22 +240,22 @@ class ForgotPasswordView(APIView):
                             </table>
                         </td>
                     </tr>
-                    
+
                     <!-- Body -->
                     <tr>
                         <td style="padding: 40px 40px;">
                             <h1 style="margin: 0 0 20px 0; font-size: 24px; font-weight: 700; color: #1f2937; text-align: center;">
                                 Password Reset Request
                             </h1>
-                            
+
                             <p style="margin: 0 0 25px 0; font-size: 16px; line-height: 1.6; color: #4b5563;">
                                 Hi <strong style="color: #0d9488;">{user_name}</strong>,
                             </p>
-                            
+
                             <p style="margin: 0 0 25px 0; font-size: 16px; line-height: 1.6; color: #4b5563;">
                                 We received a request to reset the password for your SkillConnect account. Click the button below to create a new password:
                             </p>
-                            
+
                             <!-- CTA Button -->
                             <table role="presentation" style="width: 100%; margin: 30px 0;">
                                 <tr>
@@ -266,7 +266,7 @@ class ForgotPasswordView(APIView):
                                     </td>
                                 </tr>
                             </table>
-                            
+
                             <!-- Timer Warning -->
                             <table role="presentation" style="width: 100%; background: #fef3c7; border-radius: 12px; margin: 25px 0;">
                                 <tr>
@@ -277,15 +277,15 @@ class ForgotPasswordView(APIView):
                                     </td>
                                 </tr>
                             </table>
-                            
+
                             <p style="margin: 25px 0 15px 0; font-size: 14px; color: #6b7280;">
                                 If the button doesn't work, copy and paste this link into your browser:
                             </p>
-                            
+
                             <p style="margin: 0 0 25px 0; font-size: 12px; color: #0d9488; word-break: break-all; background: #f0fdfa; padding: 12px; border-radius: 8px;">
                                 {reset_link}
                             </p>
-                            
+
                             <!-- Security Notice -->
                             <table role="presentation" style="width: 100%; background: #fef2f2; border-radius: 12px; margin-top: 25px;">
                                 <tr>
@@ -298,7 +298,7 @@ class ForgotPasswordView(APIView):
                             </table>
                         </td>
                     </tr>
-                    
+
                     <!-- Footer -->
                     <tr>
                         <td style="background: #f9fafb; padding: 30px 40px; border-radius: 0 0 16px 16px; text-align: center; border-top: 1px solid #e5e7eb;">
@@ -306,7 +306,7 @@ class ForgotPasswordView(APIView):
                                 Need help? Contact us at<br>
                                 <a href="mailto:support@skillconnect.dev" style="color: #0d9488; text-decoration: none; font-weight: 600;">support@skillconnect.dev</a>
                             </p>
-                            
+
                             <table role="presentation" style="margin: 20px auto;">
                                 <tr>
                                     <td style="padding: 0 8px;"><a href="https://skillconnect.dev" style="color: #9ca3af; font-size: 20px; text-decoration: none;">🌐</a></td>
@@ -315,7 +315,7 @@ class ForgotPasswordView(APIView):
                                     <td style="padding: 0 8px;"><a href="#" style="color: #9ca3af; font-size: 20px; text-decoration: none;">💼</a></td>
                                 </tr>
                             </table>
-                            
+
                             <p style="margin: 20px 0 0 0; font-size: 12px; color: #9ca3af;">
                                 © 2026 SkillConnect. All rights reserved.<br>
                                 India's Premier Job Platform
@@ -323,7 +323,7 @@ class ForgotPasswordView(APIView):
                         </td>
                     </tr>
                 </table>
-                
+
                 <!-- Bottom Text -->
                 <table role="presentation" style="width: 100%; max-width: 600px; margin-top: 20px;">
                     <tr>
@@ -340,8 +340,8 @@ class ForgotPasswordView(APIView):
 </body>
 </html>
 '''
-            
-            # Plain text fallback
+
+
             text_content = f'''
 Hi {user_name},
 
@@ -360,8 +360,8 @@ support@skillconnect.dev
 
 © 2026 SkillConnect - India's Premier Job Platform
 '''
-            
-            # Send email using Resend API (works on Render free tier!)
+
+
             try:
                 email_thread = threading.Thread(
                     target=send_email_with_resend,
@@ -370,14 +370,14 @@ support@skillconnect.dev
                 email_thread.start()
             except Exception as e:
                 print(f"Email setup failed: {e}")
-            
+
             return Response({
                 'message': 'If an account exists with this email, a reset link has been sent.',
                 'success': True
             })
-            
+
         except CustomUser.DoesNotExist:
-            # Don't reveal if email exists or not (security)
+
             return Response({
                 'message': 'If an account exists with this email, a reset link has been sent.',
                 'success': True
@@ -389,32 +389,32 @@ class ResetPasswordView(APIView):
     def post(self, request):
         token = request.data.get('token', '')
         new_password = request.data.get('password', '')
-        
+
         if not token or not new_password:
             return Response({'error': 'Token and password are required'}, status=400)
-        
+
         if len(new_password) < 6:
             return Response({'error': 'Password must be at least 6 characters'}, status=400)
-        
-        # Get user from cache
+
+
         cache_key = f'password_reset_{token}'
         user_id = cache.get(cache_key)
-        
+
         if not user_id:
             return Response({'error': 'Invalid or expired reset link'}, status=400)
-        
+
         try:
             user = CustomUser.objects.get(id=user_id)
             user.set_password(new_password)
             user.save()
-            
-            # Delete the token
+
+
             cache.delete(cache_key)
-            
+
             return Response({
                 'message': 'Password reset successfully! You can now login.',
                 'success': True
             })
-            
+
         except CustomUser.DoesNotExist:
             return Response({'error': 'User not found'}, status=400)

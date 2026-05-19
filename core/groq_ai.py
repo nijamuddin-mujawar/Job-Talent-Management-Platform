@@ -14,7 +14,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
-# PDF text extraction
+
 try:
     import PyPDF2
     PDF_AVAILABLE = True
@@ -24,22 +24,22 @@ except ImportError:
 
 class GroqResumeAnalyzer:
     """Resume analysis using Groq AI (FREE tier)"""
-    
+
     GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-    
+
     def __init__(self):
-        # Get API key from environment or settings
+
         self.api_key = os.environ.get('GROQ_API_KEY', getattr(settings, 'GROQ_API_KEY', '')).strip()
-    
+
     def analyze_resume(self, resume_text: str, job_description: str = None) -> dict:
         """
         Analyze resume using Groq's Llama 3.3 model
         Returns detailed ATS analysis with suggestions
         """
-        
+
         if not self.api_key:
             return self._get_error_response("GROQ_API_KEY not configured")
-        
+
         system_prompt = """You are an expert HR professional and ATS (Applicant Tracking System) specialist.
 Analyze the resume and provide detailed feedback in JSON format.
 
@@ -58,7 +58,7 @@ JSON Structure:
         },
         "keywords": {
             "score": 75,
-            "status": "warning", 
+            "status": "warning",
             "feedback": "Good keyword density but can be improved...",
             "suggestions": ["Add more technical keywords", "Include industry terms"],
             "found_keywords": ["Python", "JavaScript", "React"],
@@ -117,7 +117,7 @@ Provide your analysis in the exact JSON format specified. Be specific and helpfu
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json"
             }
-            
+
             payload = {
                 "model": "llama-3.3-70b-versatile",
                 "messages": [
@@ -128,22 +128,22 @@ Provide your analysis in the exact JSON format specified. Be specific and helpfu
                 "temperature": 0.3,
                 "response_format": {"type": "json_object"}
             }
-            
+
             response = requests.post(
                 self.GROQ_API_URL,
                 headers=headers,
                 json=payload,
                 timeout=30
             )
-            
+
             if response.status_code != 200:
                 error_detail = response.json().get('error', {}).get('message', 'Unknown error')
                 return self._get_error_response(f"Groq API error: {error_detail}")
-            
+
             result = response.json()
             ai_content = result['choices'][0]['message']['content']
-            
-            # Parse JSON response
+
+
             try:
                 analysis = json.loads(ai_content)
                 return {
@@ -151,7 +151,7 @@ Provide your analysis in the exact JSON format specified. Be specific and helpfu
                     'analysis': analysis
                 }
             except json.JSONDecodeError:
-                # Try to extract JSON from response
+
                 json_match = re.search(r'\{.*\}', ai_content, re.DOTALL)
                 if json_match:
                     analysis = json.loads(json_match.group())
@@ -160,14 +160,14 @@ Provide your analysis in the exact JSON format specified. Be specific and helpfu
                         'analysis': analysis
                     }
                 return self._get_error_response("Failed to parse AI response")
-                
+
         except requests.exceptions.Timeout:
             return self._get_error_response("Request timed out. Please try again.")
         except requests.exceptions.RequestException as e:
             return self._get_error_response(f"Network error: {str(e)}")
         except Exception as e:
             return self._get_error_response(f"Analysis error: {str(e)}")
-    
+
     def _get_error_response(self, error_message: str) -> dict:
         """Return error response with fallback analysis"""
         return {
@@ -175,7 +175,7 @@ Provide your analysis in the exact JSON format specified. Be specific and helpfu
             'error': error_message,
             'analysis': self._get_fallback_analysis()
         }
-    
+
     def _get_fallback_analysis(self) -> dict:
         """Fallback analysis when AI is unavailable"""
         return {
@@ -229,7 +229,7 @@ def extract_text_from_pdf(pdf_file) -> str:
     """Extract text content from uploaded PDF file"""
     if not PDF_AVAILABLE:
         return ""
-    
+
     try:
         pdf_reader = PyPDF2.PdfReader(pdf_file)
         text = ""
@@ -243,27 +243,27 @@ def extract_text_from_pdf(pdf_file) -> str:
 class GroqResumeAnalysisView(APIView):
     """
     API endpoint for AI-powered resume analysis using Groq
-    
+
     POST /api/ai/analyze-resume/
-    
+
     Accepts:
     - resume_file: PDF/DOC file upload
     - resume_text: Plain text (alternative to file)
     - job_description: Optional target job description
     """
-    
-    permission_classes = [AllowAny]  # Allow without login for demo
+
+    permission_classes = [AllowAny]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-    
+
     def post(self, request):
         resume_text = ""
         job_description = request.data.get('job_description', '')
-        
-        # Check for file upload
+
+
         if 'resume_file' in request.FILES:
             uploaded_file = request.FILES['resume_file']
             file_name = uploaded_file.name.lower()
-            
+
             if file_name.endswith('.pdf'):
                 resume_text = extract_text_from_pdf(uploaded_file)
                 if not resume_text:
@@ -272,8 +272,8 @@ class GroqResumeAnalysisView(APIView):
                         'error': 'Could not extract text from PDF. Please ensure the PDF contains readable text.'
                     }, status=status.HTTP_400_BAD_REQUEST)
             elif file_name.endswith(('.doc', '.docx')):
-                # For .doc/.docx, we'd need python-docx library
-                # For now, ask user to paste text
+
+
                 return Response({
                     'success': False,
                     'error': 'DOC/DOCX files require additional processing. Please paste your resume text instead.'
@@ -283,41 +283,41 @@ class GroqResumeAnalysisView(APIView):
                     'success': False,
                     'error': 'Unsupported file format. Please upload PDF or paste resume text.'
                 }, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Check for text input
+
+
         elif 'resume_text' in request.data:
             resume_text = request.data.get('resume_text', '').strip()
-        
+
         if not resume_text:
             return Response({
                 'success': False,
                 'error': 'Please upload a resume file or provide resume text.'
             }, status=status.HTTP_400_BAD_REQUEST)
-        
+
         if len(resume_text) < 100:
             return Response({
                 'success': False,
                 'error': 'Resume text is too short. Please provide complete resume content.'
             }, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Perform AI analysis
+
+
         analyzer = GroqResumeAnalyzer()
         result = analyzer.analyze_resume(resume_text, job_description)
-        
+
         return Response(result)
 
 
 class GroqDemoAnalysisView(APIView):
     """
     Demo endpoint that analyzes a sample resume
-    
+
     GET /api/ai/demo-analysis/
     """
-    
+
     permission_classes = [AllowAny]
-    
+
     def get(self, request):
-        # Sample resume for demo
+
         sample_resume = """
 RAHUL SHARMA
 Software Developer
@@ -326,8 +326,8 @@ LinkedIn: linkedin.com/in/rahulsharma | GitHub: github.com/rahulsharma
 Location: Bangalore, India
 
 PROFESSIONAL SUMMARY
-Passionate software developer with 2 years of experience in building web applications 
-using Python, Django, and React. Strong problem-solving skills and ability to work in 
+Passionate software developer with 2 years of experience in building web applications
+using Python, Django, and React. Strong problem-solving skills and ability to work in
 agile environments. Looking for opportunities to grow in a challenging role.
 
 EDUCATION
@@ -368,27 +368,27 @@ CERTIFICATIONS
 - AWS Cloud Practitioner (2023)
 - Python for Data Science - Coursera (2022)
 """
-        
+
         analyzer = GroqResumeAnalyzer()
         result = analyzer.analyze_resume(sample_resume)
-        
+
         return Response(result)
 
 
 class GroqJobMatchAnalyzer:
     """AI-powered job match analysis using Groq"""
-    
+
     GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-    
+
     def __init__(self):
         self.api_key = os.environ.get('GROQ_API_KEY', getattr(settings, 'GROQ_API_KEY', '')).strip()
-    
+
     def analyze_match(self, profile_text: str, job_description: str) -> dict:
         """Analyze how well a profile matches a job description"""
-        
+
         if not self.api_key:
             return self._get_error_response("GROQ_API_KEY not configured")
-        
+
         system_prompt = """You are an expert HR recruiter and job matching specialist.
 Analyze the candidate profile against the job description and provide a detailed match analysis.
 
@@ -454,7 +454,7 @@ Provide detailed match analysis in the exact JSON format specified."""
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json"
             }
-            
+
             payload = {
                 "model": "llama-3.3-70b-versatile",
                 "messages": [
@@ -465,27 +465,27 @@ Provide detailed match analysis in the exact JSON format specified."""
                 "temperature": 0.3,
                 "response_format": {"type": "json_object"}
             }
-            
+
             response = requests.post(
                 self.GROQ_API_URL,
                 headers=headers,
                 json=payload,
                 timeout=30
             )
-            
+
             if response.status_code != 200:
                 error_detail = response.json().get('error', {}).get('message', 'Unknown error')
                 return self._get_error_response(f"Groq API error: {error_detail}")
-            
+
             result = response.json()
             ai_content = result['choices'][0]['message']['content']
-            
+
             analysis = json.loads(ai_content)
             return {'success': True, 'analysis': analysis}
-                
+
         except Exception as e:
             return self._get_error_response(f"Analysis error: {str(e)}")
-    
+
     def _get_error_response(self, error_message: str) -> dict:
         return {
             'success': False,
@@ -503,18 +503,18 @@ Provide detailed match analysis in the exact JSON format specified."""
 
 class GroqInterviewFeedback:
     """AI-powered interview answer feedback using Groq"""
-    
+
     GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-    
+
     def __init__(self):
         self.api_key = os.environ.get('GROQ_API_KEY', getattr(settings, 'GROQ_API_KEY', '')).strip()
-    
+
     def evaluate_answer(self, question: str, answer: str, job_role: str = "Software Developer") -> dict:
         """Evaluate an interview answer and provide feedback"""
-        
+
         if not self.api_key:
             return self._get_error_response("GROQ_API_KEY not configured")
-        
+
         system_prompt = """You are an expert interview coach and HR professional.
 Evaluate the candidate's answer to the interview question and provide constructive feedback.
 
@@ -568,7 +568,7 @@ Provide detailed feedback and scores in the exact JSON format specified."""
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json"
             }
-            
+
             payload = {
                 "model": "llama-3.3-70b-versatile",
                 "messages": [
@@ -579,27 +579,27 @@ Provide detailed feedback and scores in the exact JSON format specified."""
                 "temperature": 0.3,
                 "response_format": {"type": "json_object"}
             }
-            
+
             response = requests.post(
                 self.GROQ_API_URL,
                 headers=headers,
                 json=payload,
                 timeout=30
             )
-            
+
             if response.status_code != 200:
                 error_detail = response.json().get('error', {}).get('message', 'Unknown error')
                 return self._get_error_response(f"Groq API error: {error_detail}")
-            
+
             result = response.json()
             ai_content = result['choices'][0]['message']['content']
-            
+
             feedback = json.loads(ai_content)
             return {'success': True, 'feedback': feedback}
-                
+
         except Exception as e:
             return self._get_error_response(f"Evaluation error: {str(e)}")
-    
+
     def _get_error_response(self, error_message: str) -> dict:
         return {
             'success': False,
@@ -615,44 +615,44 @@ Provide detailed feedback and scores in the exact JSON format specified."""
 
 class GroqJobMatchView(APIView):
     """API endpoint for AI job match analysis"""
-    
+
     permission_classes = [AllowAny]
     parser_classes = [JSONParser]
-    
+
     def post(self, request):
         profile_text = request.data.get('profile', '').strip()
         job_description = request.data.get('job_description', '').strip()
-        
+
         if not profile_text or not job_description:
             return Response({
                 'success': False,
                 'error': 'Both profile and job description are required.'
             }, status=status.HTTP_400_BAD_REQUEST)
-        
+
         analyzer = GroqJobMatchAnalyzer()
         result = analyzer.analyze_match(profile_text, job_description)
-        
+
         return Response(result)
 
 
 class GroqInterviewFeedbackView(APIView):
     """API endpoint for AI interview answer feedback"""
-    
+
     permission_classes = [AllowAny]
     parser_classes = [JSONParser]
-    
+
     def post(self, request):
         question = request.data.get('question', '').strip()
         answer = request.data.get('answer', '').strip()
         job_role = request.data.get('job_role', 'Software Developer')
-        
+
         if not question or not answer:
             return Response({
                 'success': False,
                 'error': 'Both question and answer are required.'
             }, status=status.HTTP_400_BAD_REQUEST)
-        
+
         evaluator = GroqInterviewFeedback()
         result = evaluator.evaluate_answer(question, answer, job_role)
-        
+
         return Response(result)
