@@ -656,7 +656,7 @@ const notificationStyles = `
 document.head.insertAdjacentHTML('beforeend', notificationStyles);
 """
 
-"""
+"""Example Channels installation and ASGI configuration snippet.
 channels==4.0.0
 channels-redis==4.1.0
 redis==5.0.1

@@ -218,7 +218,7 @@ def batch_database_operations(operations, batch_size=100):
             for operation in batch:
                 operation()
 
-"""
+"""Example usage for caching and query optimization in views.
 
 from .performance import cache_result, CacheManager, QueryOptimizer
 

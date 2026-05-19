@@ -316,7 +316,7 @@ class SecurityAuditLogger:
         """Log sensitive data access"""
         security_logger.info(f"Data access: {user.email} {action} {data_type}")
 
-"""
+"""Example settings snippet for enabling security middleware and throttling.
 MIDDLEWARE = [
     'core.security.AdvancedSecurityMiddleware',
     'core.security.RateLimitMiddleware', 
