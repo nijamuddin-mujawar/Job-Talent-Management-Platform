@@ -15,27 +15,22 @@ class JobListView(generics.ListAPIView):
     def get_queryset(self):
         queryset = Job.objects.filter(is_active=True)
         
-        # Category filtering
         category = self.request.query_params.get('category')
         if category and category != '':
             queryset = queryset.filter(category=category)
         
-        # Job type filtering
         job_type = self.request.query_params.get('job_type')
         if job_type:
             queryset = queryset.filter(job_type=job_type)
             
-        # Experience level filtering
         experience_level = self.request.query_params.get('experience_level')
         if experience_level:
             queryset = queryset.filter(experience_level=experience_level)
             
-        # Work mode filtering
         work_mode = self.request.query_params.get('work_mode')
         if work_mode:
             queryset = queryset.filter(work_mode=work_mode)
         
-        # Custom filtering for salary range
         min_salary = self.request.query_params.get('min_salary')
         max_salary = self.request.query_params.get('max_salary')
         
@@ -44,7 +39,6 @@ class JobListView(generics.ListAPIView):
         if max_salary:
             queryset = queryset.filter(max_salary__lte=max_salary)
             
-        # Custom search for keywords
         keyword = self.request.query_params.get('keyword')
         if keyword:
             queryset = queryset.filter(
@@ -53,7 +47,6 @@ class JobListView(generics.ListAPIView):
                 Q(description__icontains=keyword)
             )
             
-        # Location filtering
         location = self.request.query_params.get('location')
         if location and location.lower() != 'all':
             queryset = queryset.filter(location__icontains=location)
@@ -83,13 +76,10 @@ def job_stats(request):
         'companies': companies_count
     })
 
-# Job Application Views
 class JobApplicationCreateView(generics.CreateAPIView):
     serializer_class = JobApplicationCreateSerializer
-    # No authentication required - guest applications allowed
     
     def perform_create(self, serializer):
-        # Only set user if authenticated
         if self.request.user.is_authenticated:
             serializer.save(user=self.request.user)
         else:
@@ -117,7 +107,6 @@ def apply_to_job(request, job_id):
     except Job.DoesNotExist:
         return Response({'error': 'Job not found'}, status=status.HTTP_404_NOT_FOUND)
     
-    # Check for duplicate application by email
     email = request.data.get('email')
     if email:
         existing_application = JobApplication.objects.filter(
@@ -129,13 +118,11 @@ def apply_to_job(request, job_id):
                 'error': 'An application with this email already exists for this job'
             }, status=status.HTTP_400_BAD_REQUEST)
     
-    # Create application
     data = request.data.copy()
     data['job'] = job_id
     
     serializer = JobApplicationCreateSerializer(data=data)
     if serializer.is_valid():
-        # Link application to user if authenticated
         if request.user.is_authenticated:
             application = serializer.save(user=request.user)
         else:

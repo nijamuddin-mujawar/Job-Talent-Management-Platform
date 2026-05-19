@@ -23,7 +23,6 @@ from typing import Dict, Any
 import logging
 import base64
 
-# Optional imports with fallbacks
 try:
     from cryptography.fernet import Fernet
     CRYPTOGRAPHY_AVAILABLE = True
@@ -36,7 +35,6 @@ try:
 except ImportError:
     DEBUG_TOOLBAR_AVAILABLE = False
 
-# Configure security logger
 security_logger = logging.getLogger('security')
 
 class AdvancedSecurityMiddleware:
@@ -46,21 +44,17 @@ class AdvancedSecurityMiddleware:
         self.get_response = get_response
     
     def __call__(self, request):
-        # Security headers
         response = self.get_response(request)
         
-        # OWASP recommended headers
         response['X-Content-Type-Options'] = 'nosniff'
         response['X-Frame-Options'] = 'DENY'
         response['X-XSS-Protection'] = '1; mode=block'
         response['Referrer-Policy'] = 'strict-origin-when-cross-origin'
         response['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
         
-        # HSTS Header (only in production with HTTPS)
         if request.is_secure():
             response['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
         
-        # Content Security Policy
         csp_policy = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
@@ -81,10 +75,8 @@ class RateLimitMiddleware:
         self.rate_limit_cache = {}
     
     def __call__(self, request):
-        # Get client IP
         client_ip = self.get_client_ip(request)
         
-        # Check rate limits
         if self.is_rate_limited(client_ip, request.path):
             return HttpResponse(
                 'Rate limit exceeded. Please try again later.',
@@ -108,10 +100,8 @@ class RateLimitMiddleware:
         """Check if client is rate limited"""
         cache_key = f"rate_limit:{client_ip}:{path}"
         
-        # Get current request count
         current_requests = cache.get(cache_key, 0)
         
-        # Different limits for different endpoints
         if '/api/accounts/login/' in path:
             limit = 5  # 5 login attempts per minute
             window = 60
@@ -126,7 +116,6 @@ class RateLimitMiddleware:
             security_logger.warning(f"Rate limit exceeded for IP {client_ip} on {path}")
             return True
         
-        # Increment counter
         cache.set(cache_key, current_requests + 1, window)
         return False
 
@@ -143,7 +132,6 @@ class SQLInjectionProtectionMiddleware:
         ]
     
     def __call__(self, request):
-        # Check for SQL injection attempts
         if self.detect_sql_injection(request):
             security_logger.critical(f"SQL injection attempt from {request.META.get('REMOTE_ADDR')}")
             return HttpResponse('Security violation detected', status=403)
@@ -153,12 +141,10 @@ class SQLInjectionProtectionMiddleware:
     
     def detect_sql_injection(self, request) -> bool:
         """Detect potential SQL injection attempts"""
-        # Check query parameters
         for key, value in request.GET.items():
             if self.contains_sql_injection(value):
                 return True
         
-        # Check POST data
         if hasattr(request, 'body') and request.body:
             body_str = request.body.decode('utf-8', errors='ignore')
             if self.contains_sql_injection(body_str):
@@ -184,7 +170,6 @@ class APIKeySecurityMixin:
         if not api_key:
             return False
         
-        # Check against valid API keys (store in cache/database)
         valid_keys = cache.get('valid_api_keys', [])
         return api_key in valid_keys
 
@@ -196,16 +181,13 @@ class SecureFileUploadMixin:
     
     def validate_uploaded_file(self, uploaded_file):
         """Validate uploaded file for security"""
-        # Check file extension
         file_extension = uploaded_file.name.lower().split('.')[-1]
         if f'.{file_extension}' not in self.ALLOWED_EXTENSIONS:
             return False, "File type not allowed"
         
-        # Check file size
         if uploaded_file.size > self.MAX_FILE_SIZE:
             return False, "File too large"
         
-        # Check for malicious content (basic)
         if self.contains_malicious_content(uploaded_file):
             return False, "File contains suspicious content"
         
@@ -214,7 +196,6 @@ class SecureFileUploadMixin:
     def contains_malicious_content(self, uploaded_file) -> bool:
         """Basic malicious content detection"""
         try:
-            # Read first 1KB to check for suspicious patterns
             content = uploaded_file.read(1024).decode('utf-8', errors='ignore')
             uploaded_file.seek(0)  # Reset file pointer
             
@@ -233,16 +214,13 @@ class SecureFileUploadMixin:
         
         return False
 
-# Custom permissions
 class IsOwnerOrReadOnly(BasePermission):
     """Permission to only allow owners to edit objects"""
     
     def has_object_permission(self, request, view, obj):
-        # Read permissions for any request
         if request.method in ['GET', 'HEAD', 'OPTIONS']:
             return True
         
-        # Write permissions only to the owner
         return obj.user == request.user
 
 class IsVerifiedUser(BasePermission):
@@ -251,7 +229,6 @@ class IsVerifiedUser(BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated and getattr(request.user, 'is_verified', True)
 
-# Custom throttling
 class BurstRateThrottle(UserRateThrottle):
     """Burst rate limiting"""
     scope = 'burst'
@@ -260,7 +237,6 @@ class SustainedRateThrottle(UserRateThrottle):
     """Sustained rate limiting"""
     scope = 'sustained'
 
-# Security decorators
 def require_https(view_func):
     """Decorator to require HTTPS"""
     @wraps(view_func)
@@ -284,7 +260,6 @@ def log_security_event(event_type: str):
         return wrapper
     return decorator
 
-# Encryption utilities
 class DataEncryption:
     """Data encryption utilities"""
     
@@ -293,7 +268,6 @@ class DataEncryption:
         """Encrypt sensitive data"""
         if CRYPTOGRAPHY_AVAILABLE:
             try:
-                # In production, use environment variable for key
                 key = getattr(settings, 'ENCRYPTION_KEY', Fernet.generate_key())
                 f = Fernet(key)
                 
@@ -302,7 +276,6 @@ class DataEncryption:
             except Exception:
                 pass
         
-        # Fallback - simple base64 encoding
         return base64.b64encode(data.encode()).decode()
     
     @staticmethod
@@ -318,13 +291,11 @@ class DataEncryption:
             except Exception:
                 pass
         
-        # Fallback - simple base64 decoding
         try:
             return base64.b64decode(encrypted_data.encode()).decode()
         except Exception:
             return encrypted_data  # Return as-is if decoding fails
 
-# Security audit logging
 class SecurityAuditLogger:
     """Comprehensive security audit logging"""
     
@@ -345,17 +316,13 @@ class SecurityAuditLogger:
         """Log sensitive data access"""
         security_logger.info(f"Data access: {user.email} {action} {data_type}")
 
-# Usage examples in settings.py:
 """
-# Add to MIDDLEWARE
 MIDDLEWARE = [
     'core.security.AdvancedSecurityMiddleware',
     'core.security.RateLimitMiddleware', 
     'core.security.SQLInjectionProtectionMiddleware',
-    # ... other middleware
 ]
 
-# Rate limiting settings
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
@@ -366,7 +333,6 @@ CACHES = {
     }
 }
 
-# DRF Throttling
 REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': [
         'core.security.BurstRateThrottle',
@@ -378,7 +344,6 @@ REST_FRAMEWORK = {
     }
 }
 
-# Security settings
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
@@ -386,6 +351,5 @@ SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
-# Encryption key (use environment variable in production)
 ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY', 'your-encryption-key-here')
 """

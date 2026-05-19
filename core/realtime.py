@@ -23,27 +23,21 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         """Handle WebSocket connection"""
         self.user = self.scope["user"]
         
-        # Only allow authenticated users
         if self.user == AnonymousUser:
             await self.close()
             return
         
-        # Create user-specific group
         self.notification_group = f"notifications_{self.user.id}"
         
-        # Join notification group
         await self.channel_layer.group_add(
             self.notification_group,
             self.channel_name
         )
         
-        # Accept connection
         await self.accept()
         
-        # Mark user as online
         await self.update_user_status(online=True)
         
-        # Send initial data
         await self.send_initial_notifications()
         
         logger.info(f"User {self.user.email} connected to notifications")
@@ -51,13 +45,11 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         """Handle WebSocket disconnection"""
         if hasattr(self, 'notification_group'):
-            # Leave notification group
             await self.channel_layer.group_discard(
                 self.notification_group,
                 self.channel_name
             )
         
-        # Mark user as offline
         if hasattr(self, 'user') and self.user != AnonymousUser:
             await self.update_user_status(online=False)
             logger.info(f"User {self.user.email} disconnected from notifications")
@@ -86,7 +78,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     
     async def send_initial_notifications(self):
         """Send initial notifications when user connects"""
-        # Get unread notifications from database
         notifications = await self.get_user_notifications()
         
         await self.send(text_data=json.dumps({
@@ -121,8 +112,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def get_user_notifications(self):
         """Get user notifications from database"""
-        # This would fetch from your notification model
-        # For now, returning mock data
         return [
             {
                 'id': 1,
@@ -145,7 +134,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def mark_notification_read(self, notification_id: int):
         """Mark notification as read in database"""
-        # This would update notification in database
         logger.info(f"Marking notification {notification_id} as read for user {self.user.id}")
     
     async def update_user_status(self, online: bool):
@@ -175,8 +163,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     
     async def get_online_users(self):
         """Get list of online users"""
-        # This would query cache for online users
-        # Mock implementation
         return [
             {'id': 1, 'name': 'John Doe', 'status': 'online'},
             {'id': 2, 'name': 'Jane Smith', 'status': 'online'}
@@ -201,7 +187,6 @@ class JobAlertService:
         """Broadcast new job to all relevant users"""
         channel_layer = get_channel_layer()
         
-        # This would query users interested in this job type/location
         interested_users = await JobAlertService.get_interested_users(job_data)
         
         for user_id in interested_users:
@@ -210,7 +195,6 @@ class JobAlertService:
     @staticmethod
     async def get_interested_users(job_data: Dict[str, Any]) -> List[int]:
         """Get users interested in this type of job"""
-        # Mock implementation - would query user preferences
         return [1, 2, 3]  # User IDs
 
 class NotificationService:
@@ -222,10 +206,8 @@ class NotificationService:
         channel_layer = get_channel_layer()
         group_name = f"notifications_{user_id}"
         
-        # Save notification to database first
         await NotificationService.save_notification(user_id, notification)
         
-        # Send via WebSocket
         await channel_layer.group_send(group_name, {
             'type': 'notification_message',
             'notification': notification
@@ -235,7 +217,6 @@ class NotificationService:
     @sync_to_async
     def save_notification(user_id: int, notification: Dict[str, Any]):
         """Save notification to database"""
-        # This would save to your notification model
         logger.info(f"Saving notification for user {user_id}: {notification['title']}")
     
     @staticmethod
@@ -286,23 +267,19 @@ class LiveActivityService:
             'timestamp': datetime.now().isoformat()
         }
         
-        # Cache recent activity
         activity_key = f"user_activity:{user_id}"
         recent_activities = cache.get(activity_key, [])
         recent_activities.append(activity_data)
         
-        # Keep only last 10 activities
         recent_activities = recent_activities[-10:]
         cache.set(activity_key, recent_activities, timeout=3600)
         
-        # Broadcast to admin/analytics
         channel_layer = get_channel_layer()
         await channel_layer.group_send("admin_dashboard", {
             'type': 'user_activity',
             'activity': activity_data
         })
 
-# WebSocket routing configuration
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from django.urls import path
@@ -317,7 +294,6 @@ application = ProtocolTypeRouter({
     ),
 })
 
-# Frontend JavaScript Integration
 FRONTEND_WEBSOCKET_CODE = """
 // Real-time WebSocket Integration for SkillConnect Frontend
 
@@ -680,16 +656,12 @@ const notificationStyles = `
 document.head.insertAdjacentHTML('beforeend', notificationStyles);
 """
 
-# Installation instructions for channels
 """
-# Add to requirements.txt:
 channels==4.0.0
 channels-redis==4.1.0
 redis==5.0.1
 
-# Add to settings.py:
 INSTALLED_APPS = [
-    # ... other apps
     'channels',
 ]
 
@@ -704,7 +676,6 @@ CHANNEL_LAYERS = {
     },
 }
 
-# Update asgi.py:
 import os
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack

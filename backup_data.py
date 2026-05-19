@@ -19,7 +19,6 @@ def backup_data():
     
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     
-    # Backup Jobs
     jobs = Job.objects.all()
     jobs_data = serializers.serialize('json', jobs, indent=2)
     jobs_file = os.path.join(backup_dir, f'jobs_backup_{timestamp}.json')
@@ -27,7 +26,6 @@ def backup_data():
         f.write(jobs_data)
     print(f"✅ Jobs backed up: {jobs.count()} records -> {jobs_file}")
     
-    # Backup Users (without passwords for safety)
     users = CustomUser.objects.all()
     users_data = serializers.serialize('json', users, indent=2)
     users_file = os.path.join(backup_dir, f'users_backup_{timestamp}.json')
@@ -35,7 +33,6 @@ def backup_data():
         f.write(users_data)
     print(f"✅ Users backed up: {users.count()} records -> {users_file}")
     
-    # Create latest backup copy (easy to restore)
     with open(os.path.join(backup_dir, 'jobs_latest.json'), 'w', encoding='utf-8') as f:
         f.write(jobs_data)
     with open(os.path.join(backup_dir, 'users_latest.json'), 'w', encoding='utf-8') as f:
@@ -55,7 +52,6 @@ def restore_jobs():
     with open(jobs_file, 'r', encoding='utf-8') as f:
         jobs_data = f.read()
     
-    # Deserialize and save
     for obj in serializers.deserialize('json', jobs_data):
         obj.save()
     

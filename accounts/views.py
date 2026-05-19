@@ -11,11 +11,9 @@ from .serializers import LoginSerializer
 from .serializers import ProfileSerializer, WorkExperienceSerializer, EducationSerializer, SkillSerializer
 from .models import WorkExperience, Education, Skill, CustomUser
 
-# ✅ Industry Level Performance Optimization
 try:
     from core.performance import cache_result, CacheManager, PerformanceMonitor
 except ImportError:
-    # Fallback if performance module not available
     def cache_result(timeout=300, key_prefix=''):
         def decorator(func):
             return func
@@ -77,7 +75,6 @@ class ProfileView(APIView):
         return Response(serializer.errors, status=400)
 
 
-# Work Experience Views
 class WorkExperienceListCreateView(generics.ListCreateAPIView):
     serializer_class = WorkExperienceSerializer
     permission_classes = [IsAuthenticated]
@@ -97,7 +94,6 @@ class WorkExperienceDetailView(generics.RetrieveUpdateDestroyAPIView):
         return WorkExperience.objects.filter(user=self.request.user)
 
 
-# Education Views
 class EducationListCreateView(generics.ListCreateAPIView):
     serializer_class = EducationSerializer
     permission_classes = [IsAuthenticated]
@@ -117,7 +113,6 @@ class EducationDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Education.objects.filter(user=self.request.user)
 
 
-# Skills Views
 class SkillListCreateView(generics.ListCreateAPIView):
     serializer_class = SkillSerializer
     permission_classes = [IsAuthenticated]
@@ -137,7 +132,6 @@ class SkillDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Skill.objects.filter(user=self.request.user)
 
 
-# ========== FORGOT PASSWORD VIEWS ==========
 import secrets
 import threading
 import requests
@@ -192,21 +186,16 @@ class ForgotPasswordView(APIView):
         try:
             user = CustomUser.objects.get(email=email)
             
-            # Generate reset token
             reset_token = secrets.token_urlsafe(32)
             
-            # Store token in cache (expires in 1 hour)
             cache_key = f'password_reset_{reset_token}'
             cache.set(cache_key, user.id, timeout=3600)  # 1 hour
             
-            # Create reset link
             frontend_url = 'https://skillconnect.dev'
             reset_link = f'{frontend_url}/reset-password.html?token={reset_token}'
             
-            # Get user name
             user_name = user.first_name or user.email.split('@')[0]
             
-            # Professional HTML Email Template
             html_content = f'''
 <!DOCTYPE html>
 <html>
@@ -341,7 +330,6 @@ class ForgotPasswordView(APIView):
 </html>
 '''
             
-            # Plain text fallback
             text_content = f'''
 Hi {user_name},
 
@@ -361,7 +349,6 @@ support@skillconnect.dev
 © 2026 SkillConnect - India's Premier Job Platform
 '''
             
-            # Send email using Resend API (works on Render free tier!)
             try:
                 email_thread = threading.Thread(
                     target=send_email_with_resend,
@@ -377,7 +364,6 @@ support@skillconnect.dev
             })
             
         except CustomUser.DoesNotExist:
-            # Don't reveal if email exists or not (security)
             return Response({
                 'message': 'If an account exists with this email, a reset link has been sent.',
                 'success': True
@@ -396,7 +382,6 @@ class ResetPasswordView(APIView):
         if len(new_password) < 6:
             return Response({'error': 'Password must be at least 6 characters'}, status=400)
         
-        # Get user from cache
         cache_key = f'password_reset_{token}'
         user_id = cache.get(cache_key)
         
@@ -408,7 +393,6 @@ class ResetPasswordView(APIView):
             user.set_password(new_password)
             user.save()
             
-            # Delete the token
             cache.delete(cache_key)
             
             return Response({
