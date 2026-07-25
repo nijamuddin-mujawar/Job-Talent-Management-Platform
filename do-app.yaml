@@ -24,22 +24,22 @@ services:
       - key: SECRET_KEY
         scope: RUN_AND_BUILD_TIME
         type: SECRET
-        value: ""          # Dashboard me daalo
+        value: "CHANGE_ME_SECRET_KEY"          # App create ke baad dashboard me update karo
       - key: GROQ_API_KEY
         scope: RUN_AND_BUILD_TIME
         type: SECRET
-        value: ""          # Dashboard me daalo
+        value: "CHANGE_ME_GROQ_API_KEY"          # App create ke baad dashboard me update karo
       - key: CLOUDINARY_CLOUD_NAME
         scope: RUN_AND_BUILD_TIME
         value: "dhr28ygvm"
       - key: CLOUDINARY_API_KEY
         scope: RUN_AND_BUILD_TIME
         type: SECRET
-        value: ""          # Dashboard me daalo
+        value: "CHANGE_ME_CLOUDINARY_API_KEY"          # App create ke baad dashboard me update karo
       - key: CLOUDINARY_API_SECRET
         scope: RUN_AND_BUILD_TIME
         type: SECRET
-        value: ""          # Dashboard me daalo
+        value: "CHANGE_ME_CLOUDINARY_API_SECRET"          # App create ke baad dashboard me update karo
       - key: DATABASE_URL
         scope: RUN_AND_BUILD_TIME
         value: ${db.DATABASE_URL}  # Auto-linked from database below
