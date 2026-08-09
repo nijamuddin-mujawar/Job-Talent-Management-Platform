@@ -87,7 +87,7 @@ Base path: `/api/`
 
 ```bash
 # 1) Clone
-git clone https://github.com/nijamuddinmujawar77-coder/skillconnect-backend.git
+git clone https://github.com/nijamuddin-mujawar/skillconnect-backend.git
 cd skillconnect-backend
 
 # 2) Create virtual env
@@ -127,6 +127,6 @@ Built and maintained a Django REST backend powering a career platform with authe
 ## Contact
 
 **Nijamuddin Mujawar**
-- GitHub: https://github.com/nijamuddinmujawar77-coder
-- Email: nijamuddinmujawar77@gmail.com
+- GitHub: https://github.com/nijamuddin-mujawar
+- Email: nijamujawar@gmail.com
 
