@@ -1,4 +1,4 @@
-# Job-Talent-Management-Platform
+# (SkillConnect) Job-Talent-Management-Platform
 
 Production-oriented Django REST backend for **SkillConnect**, a career platform focused on job discovery, profile building, and AI-assisted career tools.
 
